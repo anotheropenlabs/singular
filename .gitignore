@@ -27,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -34,3 +35,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# SQLite database
+*.db
+*.db-journal
+/data/
+
+# sing-box config and binaries
+/config/
+*.json.bak
+
+# Logs
+logs/
+*.log
+
+# OS files
+Thumbs.db
