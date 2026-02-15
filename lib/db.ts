@@ -17,6 +17,11 @@ function getDatabasePath(): string {
  */
 function readSchema(): string {
     const schemaPath = path.join(process.cwd(), 'lib', 'db', 'schema.sql');
+
+    if (!fs.existsSync(schemaPath)) {
+        throw new Error(`Schema file not found: ${schemaPath}`);
+    }
+
     return fs.readFileSync(schemaPath, 'utf-8');
 }
 
@@ -62,6 +67,14 @@ export function getDatabase(): Database.Database {
 
 /**
  * Run a SQL statement and return the result
+ *
+ * @WARNING Always use parameterized queries! Never interpolate user input into SQL.
+ * @example
+ * // GOOD - use params array
+ * run('INSERT INTO users (name) VALUES (?)', [userName]);
+ *
+ * // BAD - SQL injection vulnerability!
+ * run(`INSERT INTO users (name) VALUES ('${userName}')`);
  */
 export function run(sql: string, params: unknown[] = []): Database.RunResult {
     const database = getDatabase();
@@ -71,6 +84,14 @@ export function run(sql: string, params: unknown[] = []): Database.RunResult {
 
 /**
  * Get a single row from a SQL query
+ *
+ * @WARNING Always use parameterized queries! Never interpolate user input into SQL.
+ * @example
+ * // GOOD - use params array
+ * get<User>('SELECT * FROM users WHERE id = ?', [userId]);
+ *
+ * // BAD - SQL injection vulnerability!
+ * get<User>(`SELECT * FROM users WHERE id = ${userId}`);
  */
 export function get<T = unknown>(sql: string, params: unknown[] = []): T | undefined {
     const database = getDatabase();
@@ -80,6 +101,14 @@ export function get<T = unknown>(sql: string, params: unknown[] = []): T | undef
 
 /**
  * Get all rows from a SQL query
+ *
+ * @WARNING Always use parameterized queries! Never interpolate user input into SQL.
+ * @example
+ * // GOOD - use params array
+ * all<User>('SELECT * FROM users WHERE status = ?', [status]);
+ *
+ * // BAD - SQL injection vulnerability!
+ * all<User>(`SELECT * FROM users WHERE status = ${status}`);
  */
 export function all<T = unknown>(sql: string, params: unknown[] = []): T[] {
     const database = getDatabase();
