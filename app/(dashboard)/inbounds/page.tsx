@@ -29,7 +29,7 @@ export default function InboundsPage() {
     fetchInbounds();
   }, []);
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: { tag: string; protocol: string; port: number; config: Record<string, unknown> }) => {
     const res = await fetch('/api/inbounds', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -42,7 +42,7 @@ export default function InboundsPage() {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
+  const handleUpdate = async (formData: { tag: string; protocol: string; port: number; config: Record<string, unknown> }) => {
     if (!editingInbound) return;
     const res = await fetch(`/api/inbounds/${editingInbound.id}`, {
       method: 'PUT',
@@ -81,7 +81,7 @@ export default function InboundsPage() {
         <div className="text-white/50 text-center py-8">Loading...</div>
       ) : inbounds.length === 0 ? (
         <div className="text-white/50 text-center py-8">
-          No inbounds configured. Click "Add Inbound" to create one.
+          No inbounds configured. Click &quot;Add Inbound&quot; to create one.
         </div>
       ) : (
         <div className="space-y-3">

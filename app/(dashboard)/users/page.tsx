@@ -33,7 +33,7 @@ export default function UsersPage() {
     fetchData();
   }, []);
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: { username: string; password?: string; traffic_limit: number; expire_at: string | null; allowed_inbounds: number[] | null }) => {
     const res = await fetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,7 +46,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
+  const handleUpdate = async (formData: { username: string; password?: string; traffic_limit: number; expire_at: string | null; allowed_inbounds: number[] | null }) => {
     if (!editingUser) return;
     const res = await fetch(`/api/users/${editingUser.id}`, {
       method: 'PUT',
@@ -91,7 +91,7 @@ export default function UsersPage() {
         <div className="text-white/50 text-center py-8">Loading...</div>
       ) : users.length === 0 ? (
         <div className="text-white/50 text-center py-8">
-          No users yet. Click "Add User" to create one.
+          No users yet. Click &quot;Add User&quot; to create one.
         </div>
       ) : (
         <div className="space-y-3">

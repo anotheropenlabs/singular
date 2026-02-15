@@ -6,10 +6,18 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import type { NodeUser, Inbound } from '@/types';
 
+interface UserFormData {
+  username: string;
+  password?: string;
+  traffic_limit: number;
+  expire_at: string | null;
+  allowed_inbounds: number[] | null;
+}
+
 interface UserFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: UserFormData) => void;
   initialData?: NodeUser | null;
   inbounds: Inbound[];
 }

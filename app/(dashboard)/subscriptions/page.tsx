@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { NodeUser, Inbound } from '@/types';
+import type { NodeUser } from '@/types';
 import SubscriptionCard from './components/SubscriptionCard';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 
 export default function SubscriptionsPage() {
   const [users, setUsers] = useState<NodeUser[]>([]);
-  const [inbounds, setInbounds] = useState<Inbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<NodeUser | null>(null);
@@ -17,14 +16,9 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, inboundsRes] = await Promise.all([
-          fetch('/api/users'),
-          fetch('/api/inbounds'),
-        ]);
+        const usersRes = await fetch('/api/users');
         const usersData = await usersRes.json();
-        const inboundsData = await inboundsRes.json();
         if (usersData.success) setUsers(usersData.data);
-        if (inboundsData.success) setInbounds(inboundsData.data);
       } finally {
         setLoading(false);
       }

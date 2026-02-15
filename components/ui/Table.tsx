@@ -1,8 +1,6 @@
 import { HTMLAttributes, forwardRef } from 'react';
 
-interface TableProps extends HTMLAttributes<HTMLTableElement> {}
-
-const Table = forwardRef<HTMLTableElement, TableProps>(
+const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <div className="overflow-x-auto rounded-lg border border-white/10">
@@ -20,9 +18,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
 
 Table.displayName = 'Table';
 
-interface TableHeaderProps extends HTMLAttributes<HTMLTableSectionElement> {}
-
-export const TableHeader = forwardRef<HTMLTableSectionElement, TableHeaderProps>(
+export const TableHeader = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <thead
@@ -38,9 +34,7 @@ export const TableHeader = forwardRef<HTMLTableSectionElement, TableHeaderProps>
 
 TableHeader.displayName = 'TableHeader';
 
-interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement> {}
-
-export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(
+export const TableBody = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <tbody
@@ -56,9 +50,7 @@ export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(
 
 TableBody.displayName = 'TableBody';
 
-interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {}
-
-export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
+export const TableRow = forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTableRowElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <tr
@@ -74,9 +66,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
 
 TableRow.displayName = 'TableRow';
 
-interface TableCellProps extends HTMLAttributes<HTMLTableCellElement> {}
-
-export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
+export const TableCell = forwardRef<HTMLTableCellElement, HTMLAttributes<HTMLTableCellElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <td
@@ -92,9 +82,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
 
 TableCell.displayName = 'TableCell';
 
-interface TableHeadCellProps extends HTMLAttributes<HTMLTableCellElement> {}
-
-export const TableHeadCell = forwardRef<HTMLTableCellElement, TableHeadCellProps>(
+export const TableHeadCell = forwardRef<HTMLTableCellElement, HTMLAttributes<HTMLTableCellElement>>(
   ({ className = '', children, ...props }, ref) => {
     return (
       <th

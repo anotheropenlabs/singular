@@ -13,6 +13,7 @@ export default function SetupPage() {
 
   useEffect(() => {
     checkSetup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkSetup = async () => {

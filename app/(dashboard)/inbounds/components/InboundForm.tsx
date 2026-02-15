@@ -8,10 +8,17 @@ import type { Protocol, Inbound } from '@/types';
 
 const protocols: Protocol[] = ['vless', 'vmess', 'trojan', 'shadowsocks', 'hysteria2', 'hysteria', 'tuic'];
 
+interface InboundFormData {
+  tag: string;
+  protocol: Protocol;
+  port: number;
+  config: Record<string, unknown>;
+}
+
 interface InboundFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: InboundFormData) => void;
   initialData?: Inbound | null;
 }
 

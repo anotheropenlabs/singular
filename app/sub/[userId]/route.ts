@@ -59,7 +59,6 @@ export async function GET(
 }
 
 function generateUri(inbound: Inbound, user: NodeUser): string {
-  const config = JSON.parse(inbound.config);
   // TODO: Implement proper URI generation for each protocol
   // This is a placeholder implementation
   return `${inbound.protocol}://${user.uuid}@example.com:${inbound.port}#${inbound.tag}`;
