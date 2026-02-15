@@ -17,7 +17,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     return (
       <span
         ref={ref}
-        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border ${variants[variant]} ${className}`}
+        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border border-white/10 ${variants[variant]} ${className}`}
         {...props}
       >
         {variant === 'success' && (
