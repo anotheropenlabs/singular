@@ -1,34 +1,32 @@
-import { HTMLAttributes, forwardRef } from 'react';
+import { HTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: 'success' | 'warning' | 'error' | 'info' | 'default';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'outline' | 'purple' | 'cyan';
 }
 
-const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className = '', variant = 'default', children, ...props }, ref) => {
-    const variants = {
-      success: 'bg-green-500/20 text-green-400 border-green-500/30',
-      warning: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      error: 'bg-red-500/20 text-red-400 border-red-500/30',
-      info: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      default: 'bg-white/10 text-white/70 border-white/20',
-    };
+export default function Badge({ className, variant = 'default', children, ...props }: BadgeProps) {
+  const variants = {
+    default: 'bg-glass text-sing-text-primary border-glass-border',
+    success: 'bg-sing-green/10 text-sing-green border-sing-green/20 shadow-[0_0_10px_-3px_rgba(16,185,129,0.3)]',
+    warning: 'bg-sing-yellow/10 text-sing-yellow border-sing-yellow/20',
+    error: 'bg-sing-red/10 text-sing-red border-sing-red/20',
+    info: 'bg-sing-blue/10 text-sing-blue border-sing-blue/20',
+    purple: 'bg-sing-purple/10 text-sing-purple border-sing-purple/20',
+    cyan: 'bg-sing-cyan/10 text-sing-cyan border-sing-cyan/20',
+    outline: 'border-glass-border text-sing-text-secondary bg-transparent',
+  };
 
-    return (
-      <span
-        ref={ref}
-        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border border-white/10 ${variants[variant]} ${className}`}
-        {...props}
-      >
-        {variant === 'success' && (
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-        )}
-        {children}
-      </span>
-    );
-  }
-);
-
-Badge.displayName = 'Badge';
-
-export default Badge;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 backdrop-blur-sm",
+        variants[variant],
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+}

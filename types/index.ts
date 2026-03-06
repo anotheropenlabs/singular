@@ -1,39 +1,61 @@
-// Admin
-export interface Admin {
-  id: number;
-  username: string;
-  password_hash: string;
-  created_at: string;
-}
 
-// Settings
-export interface Setting {
-  key: string;
-  value: string;
-}
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import * as schema from '@/lib/db/schema';
 
-export interface AppSettings {
-  server_host: string;
-  subscription_host: string;
-  subscription_port: string;
-  singbox_binary_path: string;
-  singbox_config_path: string;
-  clash_api_port: string;
-  clash_api_secret: string;
-  traffic_reset_mode: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-  traffic_reset_day: string;
-}
+// --- Database Types (Inferred from Drizzle Schema) ---
+// We keep this file to serve as a central export point for types used throughout the app.
+// This decouples the app from the specific ORM implementation details (mostly).
 
-// Inbound
+export type Admin = InferSelectModel<typeof schema.admin>;
+export type NewAdmin = InferInsertModel<typeof schema.admin>;
+
+export type Setting = InferSelectModel<typeof schema.settings>;
+
 export interface Inbound {
   id: number;
+  side: string;
   tag: string;
-  protocol: Protocol;
+  protocol: string;
   port: number;
   config: string; // JSON string
   enabled: boolean;
-  created_at: string;
-  updated_at: string;
+  certificate_id?: number | null;
+  created_at: number;
+  updated_at: number;
+}
+export type NewInbound = Omit<Inbound, 'id' | 'created_at' | 'updated_at'>;
+
+export type NodeUser = InferSelectModel<typeof schema.nodeUser>;
+export type NewNodeUser = InferInsertModel<typeof schema.nodeUser>;
+
+export type IPBlacklist = InferSelectModel<typeof schema.ipBlacklist>;
+export type LoginAttempt = InferSelectModel<typeof schema.loginAttempts>;
+export type AuditLog = InferSelectModel<typeof schema.auditLogs>;
+export type TrafficStats = InferSelectModel<typeof schema.trafficStats>;
+export type Certificate = InferSelectModel<typeof schema.certificates>;
+
+// Client Mode Types
+export type Provider = InferSelectModel<typeof schema.provider>;
+export type NewProvider = InferInsertModel<typeof schema.provider>;
+export type ProxyNode = InferSelectModel<typeof schema.proxyNode>;
+export type NewProxyNode = InferInsertModel<typeof schema.proxyNode>;
+export type ProxyGroup = InferSelectModel<typeof schema.proxyGroup>;
+export type NewProxyGroup = InferInsertModel<typeof schema.proxyGroup>;
+
+// --- App Types ---
+
+export type SystemMode = 'server' | 'client';
+
+export interface AppSettings {
+  app_server_host: string;
+  app_subscription_host: string;
+  app_subscription_port: string;
+  singbox_binary_path: string;
+  singbox_config_path: string;
+  singbox_clash_api_port: string;
+  singbox_clash_api_secret: string;
+  app_traffic_reset_mode: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  app_traffic_reset_day: string;
 }
 
 export type Protocol = 'vless' | 'vmess' | 'trojan' | 'shadowsocks' | 'hysteria2' | 'hysteria' | 'tuic';
@@ -47,47 +69,6 @@ export interface InboundConfig {
   tls?: unknown;
   transport?: unknown;
   [key: string]: unknown;
-}
-
-// User
-export interface NodeUser {
-  id: number;
-  username: string;
-  uuid: string;
-  password: string | null;
-  traffic_limit: number;
-  traffic_used: number;
-  expire_at: string | null;
-  enabled: boolean;
-  allowed_inbounds: string | null; // JSON array of inbound IDs
-  created_at: string;
-}
-
-// IP Blacklist
-export interface IPBlacklist {
-  id: number;
-  ip: string;
-  reason: string | null;
-  created_at: string;
-}
-
-// Login Attempt
-export interface LoginAttempt {
-  id: number;
-  ip: string;
-  username: string | null;
-  success: boolean;
-  created_at: string;
-}
-
-// Audit Log
-export interface AuditLog {
-  id: number;
-  action: string;
-  target: string | null;
-  details: string | null;
-  ip: string;
-  created_at: string;
 }
 
 // API Response

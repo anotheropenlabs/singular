@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { login } from '@/lib/auth';
+import { isIPBlocked, getClientIP } from '@/lib/security';
+import { logAction } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +14,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = await getClientIP();
+
+    if (await isIPBlocked(ip)) {
+      return NextResponse.json(
+        { success: false, error: 'Access denied' },
+        { status: 403 }
+      );
+    }
     const result = await login(username, password, ip);
 
     if (!result.success) {
@@ -21,6 +30,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    await logAction('LOGIN', username, { success: true }, ip);
 
     return NextResponse.json({ success: true });
   } catch (error) {

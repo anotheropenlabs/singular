@@ -1,102 +1,84 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { get, run } from '@/lib/db';
-import type { NodeUser } from '@/types';
+import { NextRequest } from 'next/server';
+import { db, nodeUser } from '@/lib/db';
+import { eq, and, ne } from 'drizzle-orm';
+import { getSystemMode } from '@/lib/settings';
+import { withAuth, successResponse, errorResponse } from '@/lib/api-response';
 
 // GET /api/users/:id
-export async function GET(
+export const GET = withAuth(async (
   request: NextRequest,
+  session: any,
   { params }: { params: Promise<{ id: string }> }
-) {
-  const admin = await getSession();
-  if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  }
-
+) => {
   const { id } = await params;
-  const user = get<NodeUser>('SELECT * FROM node_user WHERE id = ?', [id]);
+  const userId = parseInt(id);
+  const user = await db.select().from(nodeUser)
+    .where(eq(nodeUser.id, userId))
+    .get();
 
   if (!user) {
-    return NextResponse.json(
-      { success: false, error: 'User not found' },
-      { status: 404 }
-    );
+    return errorResponse('User not found', 404);
   }
 
-  return NextResponse.json({ success: true, data: user });
-}
+  return successResponse(user);
+});
 
 // PUT /api/users/:id
-export async function PUT(
+export const PUT = withAuth(async (
   request: NextRequest,
+  session: any,
   { params }: { params: Promise<{ id: string }> }
-) {
-  const admin = await getSession();
-  if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  }
-
+) => {
   const { id } = await params;
+  const userId = parseInt(id);
   const body = await request.json();
   const { username, password, traffic_limit, expire_at, enabled, allowed_inbounds } = body;
 
-  const existing = get<NodeUser>('SELECT id FROM node_user WHERE id = ?', [id]);
+  const existing = await db.select({ id: nodeUser.id })
+    .from(nodeUser)
+    .where(eq(nodeUser.id, userId))
+    .get();
+
   if (!existing) {
-    return NextResponse.json(
-      { success: false, error: 'User not found' },
-      { status: 404 }
-    );
+    return errorResponse('User not found', 404);
   }
 
   // Check username conflict
   if (username) {
-    const conflict = get<NodeUser>(
-      'SELECT id FROM node_user WHERE username = ? AND id != ?',
-      [username, id]
-    );
+    const conflict = await db.select({ id: nodeUser.id })
+      .from(nodeUser)
+      .where(and(eq(nodeUser.username, username), ne(nodeUser.id, userId)))
+      .get();
+
     if (conflict) {
-      return NextResponse.json(
-        { success: false, error: 'Username already exists' },
-        { status: 400 }
-      );
+      return errorResponse('Username already exists', 400);
     }
   }
 
-  run(
-    `UPDATE node_user SET
-      username = COALESCE(?, username),
-      password = COALESCE(?, password),
-      traffic_limit = COALESCE(?, traffic_limit),
-      expire_at = COALESCE(?, expire_at),
-      enabled = COALESCE(?, enabled),
-      allowed_inbounds = COALESCE(?, allowed_inbounds)
-    WHERE id = ?`,
-    [
-      username,
-      password,
-      traffic_limit,
-      expire_at,
-      enabled,
-      allowed_inbounds ? JSON.stringify(allowed_inbounds) : null,
-      id,
-    ]
-  );
+  const updates: Partial<typeof nodeUser.$inferInsert> = {};
+  if (username !== undefined) updates.username = username;
+  if (password !== undefined) updates.password = password;
+  if (traffic_limit !== undefined) updates.traffic_limit = traffic_limit;
+  if (expire_at !== undefined) updates.expire_at = expire_at;
+  if (enabled !== undefined) updates.enabled = !!enabled;
+  if (allowed_inbounds !== undefined) updates.allowed_inbounds = allowed_inbounds ? JSON.stringify(allowed_inbounds) : null;
 
-  return NextResponse.json({ success: true });
-}
-
-// DELETE /api/users/:id
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const admin = await getSession();
-  if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  if (Object.keys(updates).length > 0) {
+    await db.update(nodeUser).set(updates).where(eq(nodeUser.id, userId)).run();
   }
 
-  const { id } = await params;
-  run('DELETE FROM node_user WHERE id = ?', [id]);
+  return successResponse(null);
+});
 
-  return NextResponse.json({ success: true });
-}
+// DELETE /api/users/:id
+export const DELETE = withAuth(async (
+  request: NextRequest,
+  session: any,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const { id } = await params;
+  const userId = parseInt(id);
+  await db.delete(nodeUser).where(eq(nodeUser.id, userId)).run();
+
+  return successResponse(null);
+});

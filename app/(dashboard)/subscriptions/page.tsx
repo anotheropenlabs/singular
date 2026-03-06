@@ -1,37 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { NodeUser } from '@/types';
-import SubscriptionCard from './components/SubscriptionCard';
-import Card from '@/components/ui/Card';
+import SubscriptionCard from '@/components/subscriptions/SubscriptionCard';
+import Panel from '@/components/ui/Panel';
 import Input from '@/components/ui/Input';
+import { Link } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { useUsersData } from '@/hooks/useUsers';
+import { useSubscriptionUrl } from '@/hooks/useSubscriptions';
+import Button from '@/components/ui/Button';
 
 export default function SubscriptionsPage() {
-  const [users, setUsers] = useState<NodeUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
+  const { data: usersData, isLoading: loading } = useUsersData();
+  const { mutateAsync: getSubscriptionUrl } = useSubscriptionUrl();
+  const users = usersData?.users || [];
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<NodeUser | null>(null);
   const [subscriptionUrl, setSubscriptionUrl] = useState('');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersRes = await fetch('/api/users');
-        const usersData = await usersRes.json();
-        if (usersData.success) setUsers(usersData.data);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+
 
   const handleSelectUser = async (user: NodeUser) => {
     setSelectedUser(user);
-    const res = await fetch(`/api/subscriptions/${user.id}`);
-    const data = await res.json();
-    if (data.success) {
-      setSubscriptionUrl(data.data.subscriptionUrl);
+    try {
+        const data = await getSubscriptionUrl(user.id);
+        setSubscriptionUrl(data.subscriptionUrl);
+    } catch {
+        // Handled silently for now, as was the behavior before
     }
   };
 
@@ -40,47 +37,50 @@ export default function SubscriptionsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Header removed */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <Input
-            placeholder="Search users..."
+            placeholder={t('common.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <Card className="max-h-[500px] overflow-y-auto">
-            <div className="divide-y divide-white/5">
+          <Panel className="max-h-[500px] overflow-y-auto p-0 border border-[var(--border-color)] bg-[var(--bg-base)]">
+            <div className="divide-y divide-[var(--border-color)]">
               {loading ? (
-                <p className="text-white/50 text-center py-4">Loading...</p>
+                <p className="text-[var(--text-secondary)] text-center py-4 font-mono text-sm uppercase">{t('common.loading')}</p>
               ) : filteredUsers.length === 0 ? (
-                <p className="text-white/50 text-center py-4">No users found</p>
+                <p className="text-[var(--text-secondary)] text-center py-4 font-mono text-sm uppercase">{t('subscriptions.no_users')}</p>
               ) : (
                 filteredUsers.map((user) => (
-                  <button
+                  <Button
+                    variant="ghost"
                     key={user.id}
                     onClick={() => handleSelectUser(user)}
-                    className={`w-full text-left px-3 py-3 hover:bg-white/5 transition-colors ${
-                      selectedUser?.id === user.id ? 'bg-white/10' : ''
-                    }`}
+                    className={cn(
+                      "w-full h-auto text-left flex justify-start px-4 py-3 hover:bg-[var(--bg-surface-hover)] transition-none border-l-2 rounded-none",
+                      selectedUser?.id === user.id ? 'bg-[var(--bg-surface-hover)] border-[var(--accent-primary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    )}
                   >
-                    <p className="text-white font-medium">{user.username}</p>
-                    <p className="text-white/50 text-sm">{user.uuid}</p>
-                  </button>
+                    <p className="text-[var(--text-primary)] font-mono font-bold uppercase tracking-wider">{user.username}</p>
+                    <p className="text-[var(--text-secondary)] text-[10px] font-mono tracking-widest mt-1">{user.uuid}</p>
+                  </Button>
                 ))
               )}
             </div>
-          </Card>
+          </Panel>
         </div>
 
         <div>
           {selectedUser ? (
             <SubscriptionCard user={selectedUser} subscriptionUrl={subscriptionUrl} />
           ) : (
-            <Card className="flex items-center justify-center h-64">
-              <p className="text-white/50">Select a user to view subscription</p>
-            </Card>
+            <Panel className="flex flex-col items-center justify-center h-64 border border-[var(--border-color)] border-dashed bg-transparent">
+              <Link className="w-8 h-8 text-[var(--border-color)] mb-4" />
+              <p className="text-[var(--text-secondary)] font-mono text-sm uppercase tracking-wider">{t('subscriptions.select_user')}</p>
+            </Panel>
           )}
         </div>
       </div>

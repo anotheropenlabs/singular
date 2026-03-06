@@ -2,43 +2,191 @@
 @tailwind components;
 @tailwind utilities;
 
+.brand-name {
+  font-family: var(--font-mono), monospace;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: #f4f4f5;
+}
+
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 17, 24, 39;
-  --background-end-rgb: 31, 41, 55;
+  --foreground-rgb: 244, 244, 245;
+}
+
+/* Theme Options */
+:root,
+[data-theme="cyber"] {
+  --bg-base: #000000;
+  --bg-surface: #09090b;
+  --bg-surface-hover: #18181b;
+  --border-color: #27272a;
+  --text-primary: #f4f4f5;
+  --text-secondary: #71717a;
+  --accent-primary: #3b82f6;
+
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-error: #e11d48;
+}
+
+[data-theme="modern"] {
+  --bg-base: #020617;
+  --bg-surface: #0f172a;
+  --bg-surface-hover: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #38bdf8;
+
+  --status-success: #2dd4bf;
+  --status-warning: #fbbf24;
+  --status-error: #fb7185;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom right,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  background-image:
+    linear-gradient(to right, var(--bg-surface-hover) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bg-surface-hover) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: #3f3f46; /* zinc-700 */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #52525b; /* zinc-600 */
 }
 
-/* Selection styling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 ::selection {
   background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Minimalist Entrance Animations */
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-card-enter {
+  animation: enter-fade 0.2s ease-out forwards;
+}
+
+.animate-card-scale {
+  animation: enter-fade 0.2s ease-out forwards;
+}
+
+.animate-delay-100 {
+  animation-delay: 50ms;
+}
+.animate-delay-200 {
+  animation-delay: 100ms;
+}
+.animate-delay-300 {
+  animation-delay: 150ms;
+}
+.animate-delay-400 {
+  animation-delay: 200ms;
+}
+.animate-delay-500 {
+  animation-delay: 250ms;
+}
+
+/* Status Dots - Solid, no pulse */
+.status-dot {
+  position: relative;
+}
+
+.status-dot-active {
+  background: #10b981;
+}
+
+.status-dot-warn {
+  background: #f59e0b;
+}
+
+.status-dot-error {
+  background: #e11d48;
+}
+
+/* Selection Ring - Sharp border focus */
+.select-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid #3b82f6;
+  opacity: 1;
+}
+
+/* Traffic Indication - Minimal block transitions instead of flow */
+.traffic-up {
+  color: #22d3ee;
+}
+
+.traffic-down {
+  color: #3b82f6;
+}
+
+.hover-lift {
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.1s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  border-color: #3f3f46; /* zinc-700 */
+}
+
+.glass-elevated {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.glass-darker {
+  background: var(--bg-base);
+  border: 1px solid var(--bg-surface-hover);
+}
+
+/* Text emphasis classes flattened */
+.neon-text-blue,
+.neon-text-green,
+.neon-text-yellow,
+.neon-text-red {
+  text-shadow: none; /* Removed neon glow */
+  font-weight: 600;
 }

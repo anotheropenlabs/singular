@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import Shell from '@/components/layout/Shell';
 
 export default async function Layout({
   children,
@@ -14,8 +14,8 @@ export default async function Layout({
   }
 
   return (
-    <DashboardLayout username={admin.username}>
+    <Shell username={admin.username}>
       {children}
-    </DashboardLayout>
+    </Shell>
   );
 }

@@ -1,49 +1,251 @@
 'use client';
 
-import { LogOut, User } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Search, Bell, BookOpen, LogOut, Pencil, User, Monitor, Globe, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
+import AdminProfileModal from '@/components/auth/AdminProfileModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import type { SystemMode } from '@/types';
+import { toast } from 'sonner';
+import { useSystemMode } from '@/hooks/useSystemSettings';
 
-interface HeaderProps {
-  username: string;
+const NAV_INDEX = [
+  { href: '/dashboard',    label: 'Dashboard' },
+  { href: '/proxies',      label: 'Proxies' },
+  { href: '/connections',  label: 'Connections' },
+  { href: '/providers',    label: 'Providers' },
+  { href: '/nodes',        label: 'Nodes' },
+  { href: '/groups',       label: 'Proxy Groups' },
+  { href: '/rules',        label: 'Rules' },
+  { href: '/logs',         label: 'Logs' },
+  { href: '/settings',     label: 'Settings' },
+  { href: '/inbounds',     label: 'Inbounds' },
+  { href: '/users',        label: 'Users' },
+];
+
+interface HeaderCardProps {
+  username?: string;
 }
 
-export default function Header({ username }: HeaderProps) {
+export default function HeaderCard({ username }: HeaderCardProps) {
   const router = useRouter();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const { t } = useI18n();
+  const [query, setQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
+  const { data: systemMode = 'server', setMode } = useSystemMode();
+
+  const handleModeSwitch = (mode: SystemMode) => {
+    if (mode === systemMode) return;
+    setMode.mutate(mode);
   };
 
+  const handleLogout = () => {
+    window.location.href = '/api/auth/logout';
+  };
+
+  const results = query.trim().length > 0
+    ? NAV_INDEX.filter(n => n.label.toLowerCase().includes(query.toLowerCase()))
+    : [];
+
+  const handleSelect = useCallback((href: string) => {
+    router.push(href);
+    setQuery('');
+    setShowResults(false);
+  }, [router]);
+
+  // Close on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   return (
-    <header className="h-16 bg-white/5 backdrop-blur-xl border-b border-white/10 px-6 flex items-center justify-between">
-      <div className="text-white/50 text-sm">
-        {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-      </div>
-      <div className="relative">
-        <button
-          onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <User className="w-4 h-4 text-blue-400" />
-          </div>
-          <span className="text-white text-sm font-medium">{username}</span>
-        </button>
-        {showDropdown && (
-          <div className="absolute right-0 mt-2 w-48 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors rounded-lg"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
+    <header
+      className="shrink-0 flex items-center justify-between px-6 h-14 bg-[var(--bg-surface)] border-b border-[var(--border-color)]"
+    >
+      {/* ── Search ─────────────────────────────────── */}
+      <div className="flex-1 max-w-md relative" ref={dropRef}>
+        <div className={cn(
+          "flex items-center gap-2.5 px-3 py-1.5 transition-all duration-200",
+          "bg-[var(--bg-base)] border",
+          showResults || query ? "border-[var(--accent-primary)]" : "border-[var(--border-color)] focus-within:border-[var(--text-secondary)]",
+        )}>
+          <Search className="w-3.5 h-3.5 text-[var(--text-secondary)] shrink-0" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={e => { setQuery(e.target.value); setShowResults(true); }}
+            onFocus={() => setShowResults(true)}
+            placeholder="Jump to page…"
+            className="flex-1 bg-transparent text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none min-w-0"
+          />
+          <kbd className="hidden sm:flex items-center gap-1 text-[9px] text-[var(--text-secondary)] font-mono border border-[var(--border-color)] bg-[var(--bg-surface)] px-1.5 py-0.5 shrink-0 uppercase">
+            ⌘K
+          </kbd>
+        </div>
+
+        {/* Search Dropdown */}
+        {showResults && results.length > 0 && (
+          <div className={cn(
+            "absolute top-full left-0 right-0 mt-2 z-50",
+            "rounded-xl border border-white/[0.1] overflow-hidden",
+            "bg-[#0d0f1a]/95 backdrop-blur-2xl",
+            "shadow-[0_20px_60px_rgba(0,0,0,0.6)]",
+          )}>
+            {results.map((item, i) => (
+              <button
+                key={item.href}
+                onMouseDown={() => handleSelect(item.href)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                  "hover:bg-white/[0.06]",
+                  i !== 0 && "border-t border-white/[0.04]",
+                )}
+              >
+                <span className="text-sm text-white/80 font-medium">{item.label}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
+
+      {/* ── Right Actions ──────────────────────────── */}
+      <div className="flex items-center gap-4 shrink-0">
+        {/* System Mode Toggle */}
+        <div className="flex bg-[var(--bg-base)] border border-[var(--border-color)] p-0.5 shrink-0">
+          <button
+            type="button"
+            disabled={setMode.isPending}
+            onClick={() => handleModeSwitch('server')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
+              systemMode === 'server'
+                ? 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:border-[var(--border-color)]'
+            }`}
+          >
+            <Monitor className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t('settings.server_mode', 'Server')}</span>
+          </button>
+          <div className="w-px bg-[var(--border-color)]" />
+          <button
+            type="button"
+            disabled={setMode.isPending}
+            onClick={() => handleModeSwitch('client')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
+              systemMode === 'client'
+                ? 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:border-[var(--border-color)]'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t('settings.client_mode', 'Client')}</span>
+          </button>
+        </div>
+
+        {/* Docs */}
+        <div className="flex items-center gap-1">
+            <a
+            href="https://sing-box.sagernet.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 border border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)] hover:bg-[var(--bg-base)] transition-all duration-150"
+            title="Documentation"
+            >
+            <BookOpen className="w-4 h-4" />
+            </a>
+
+            {/* Notifications (decorative) */}
+            <button className="relative p-2 border border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)] hover:bg-[var(--bg-base)] transition-all duration-150">
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[var(--accent-primary)]" />
+            </button>
+        </div>
+
+        {/* Divider */}
+        <div className="h-4 w-px bg-[var(--border-color)] mx-1" />
+
+        {/* User profile */}
+        <div className="relative" ref={profileRef}>
+            <button 
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className={cn(
+                "flex items-center gap-2 pl-2 pr-2 py-1 hover:bg-[var(--bg-base)] transition-all duration-150 group border border-[var(--border-color)]",
+                showProfileMenu && "bg-[var(--bg-base)] border-[var(--accent-primary)]"
+              )}
+            >
+              <div className="w-6 h-6 bg-[var(--bg-surface)] border border-[var(--border-color)] flex items-center justify-center">
+                <span className="text-[10px] font-mono font-bold text-[var(--text-primary)] uppercase">
+                  {username?.[0] ?? 'A'}
+                </span>
+              </div>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-[var(--text-secondary)] transition-transform duration-200 hidden sm:block", showProfileMenu && "rotate-180")} />
+            </button>
+
+            {/* Profile Popover Menu */}
+            {showProfileMenu && (
+                <div className="absolute top-[calc(100%+8px)] right-0 w-48 bg-[var(--bg-surface)] border border-[var(--border-color)] p-1 animate-in slide-in-from-top-2 fade-in duration-200 overflow-hidden z-50 rounded-none shadow-2xl">
+                    <div className="px-3 py-2 border-b border-[var(--border-color)] mb-1">
+                        <p className="text-sm font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider truncate">{username ?? 'admin'}</p>
+                        <p className="text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-widest truncate">{t('auth.admin', 'System Admin')}</p>
+                    </div>
+                    <button 
+                        onClick={() => {
+                            setShowProfileMenu(false);
+                            setShowEditProfile(true);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-[var(--text-primary)] hover:bg-[var(--bg-base)] border border-transparent hover:border-[var(--border-color)] text-[10px] font-mono uppercase tracking-wider font-bold transition-colors mb-0.5"
+                    >
+                        <Pencil className="w-3.5 h-3.5" />
+                        {t('auth.edit_profile', 'Edit Profile')}
+                    </button>
+                    <button 
+                        onClick={() => {
+                            setShowProfileMenu(false);
+                            setShowLogoutConfirm(true);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sing-red hover:bg-sing-red/10 border border-transparent hover:border-sing-red/30 text-[10px] font-mono uppercase tracking-wider font-bold transition-colors"
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                        {t('auth.sign_out', 'Log out')}
+                    </button>
+                </div>
+            )}
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title={t('auth.sign_out', 'Log out')}
+        description={t('auth.logout_confirm', 'Are you sure you want to sign out?')}
+        variant="danger" 
+        confirmLabel={t('auth.sign_out', 'Log out')}
+      />
+
+      <AdminProfileModal 
+        isOpen={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        currentUsername={username || 'admin'}
+      />
     </header>
   );
 }

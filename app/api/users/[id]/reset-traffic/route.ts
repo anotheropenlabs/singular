@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { get, run } from '@/lib/db';
-import type { NodeUser } from '@/types';
+import { db, nodeUser } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
 export async function POST(
   request: NextRequest,
@@ -13,7 +13,8 @@ export async function POST(
   }
 
   const { id } = await params;
-  const user = get<NodeUser>('SELECT id FROM node_user WHERE id = ?', [id]);
+  const userId = parseInt(id);
+  const user = await db.select({ id: nodeUser.id }).from(nodeUser).where(eq(nodeUser.id, userId)).get();
 
   if (!user) {
     return NextResponse.json(
@@ -22,7 +23,7 @@ export async function POST(
     );
   }
 
-  run('UPDATE node_user SET traffic_used = 0 WHERE id = ?', [id]);
+  await db.update(nodeUser).set({ traffic_used: 0 }).where(eq(nodeUser.id, userId));
 
   return NextResponse.json({ success: true });
 }

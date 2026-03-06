@@ -1,34 +1,42 @@
-'use client';
-
 import { InputHTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = '', label, error, ...props }, ref) => {
+  ({ className, type, label, error, ...props }, ref) => {
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5 flex flex-col">
         {label && (
-          <label className="block text-sm font-medium text-white/70">
+          <label className="text-xs font-mono font-medium text-[#71717a] uppercase tracking-wider peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {label}
           </label>
         )}
         <input
+          type={type}
+          className={cn(
+            "flex h-9 w-full rounded-none border border-[#27272a] bg-[#09090b] px-3 font-mono text-sm text-[#e4e4e7] ring-offset-[#000000]",
+            "file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[#52525b]",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#3b82f6] focus-visible:border-[#3b82f6]",
+            "disabled:cursor-not-allowed disabled:opacity-40 transition-none", // Instant response
+            error && "border-[#e11d48] focus-visible:ring-[#e11d48] focus-visible:border-[#e11d48]",
+            className
+          )}
           ref={ref}
-          className={`w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all ${error ? 'border-red-500/50' : ''} ${className}`}
           {...props}
         />
         {error && (
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-[10px] font-mono text-[#e11d48] mt-1">
+            {error}
+          </p>
         )}
       </div>
     );
   }
 );
-
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export default Input;

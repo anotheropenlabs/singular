@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { get, run } from '@/lib/db';
+import { db, nodeUser } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
-import type { NodeUser } from '@/types';
 
 export async function POST(
   request: NextRequest,
@@ -14,7 +14,8 @@ export async function POST(
   }
 
   const { id } = await params;
-  const user = get<NodeUser>('SELECT id FROM node_user WHERE id = ?', [id]);
+  const userId = parseInt(id);
+  const user = await db.select({ id: nodeUser.id }).from(nodeUser).where(eq(nodeUser.id, userId)).get();
 
   if (!user) {
     return NextResponse.json(
@@ -24,7 +25,7 @@ export async function POST(
   }
 
   const newUuid = uuidv4();
-  run('UPDATE node_user SET uuid = ? WHERE id = ?', [newUuid, id]);
+  await db.update(nodeUser).set({ uuid: newUuid }).where(eq(nodeUser.id, userId));
 
   return NextResponse.json({ success: true, data: { uuid: newUuid } });
 }

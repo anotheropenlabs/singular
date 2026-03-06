@@ -1,9 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { get, run } from './db';
+import { db, admin, loginAttempts } from './db';
+import { eq, and, gt, count } from 'drizzle-orm';
 import { verifyPassword } from './password';
-import type { Admin } from '@/types';
 
 const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || 'default-secret-change-in-production'
@@ -31,7 +31,7 @@ export async function verifyToken(token: string): Promise<{ userId: number } | n
   }
 }
 
-export async function getSession(): Promise<Admin | null> {
+export async function getSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(TOKEN_NAME)?.value;
 
@@ -40,39 +40,44 @@ export async function getSession(): Promise<Admin | null> {
   const payload = await verifyToken(token);
   if (!payload) return null;
 
-  const admin = get<Admin>('SELECT * FROM admin WHERE id = ?', [payload.userId]);
-  return admin || null;
+  const adminUser = await db.select().from(admin).where(eq(admin.id, payload.userId)).get();
+  return adminUser || null;
 }
 
 export async function login(username: string, password: string, ip: string): Promise<{ success: boolean; error?: string }> {
-  // Check login attempts
-  const recentAttempts = get<{ count: number }>(
-    `SELECT COUNT(*) as count FROM login_attempts
-     WHERE ip = ? AND success = 0 AND created_at > datetime('now', '-15 minutes')`,
-    [ip]
-  );
+  // Check login attempts (last 15 mins)
+  const fifteenMinutesAgo = Math.floor(Date.now() / 1000) - 15 * 60;
+
+  const recentAttempts = await db.select({ count: count() })
+    .from(loginAttempts)
+    .where(and(
+      eq(loginAttempts.ip, ip),
+      eq(loginAttempts.success, false),
+      gt(loginAttempts.created_at, fifteenMinutesAgo)
+    ))
+    .get();
 
   if (recentAttempts && recentAttempts.count >= 5) {
     return { success: false, error: 'Too many failed attempts. Try again in 15 minutes.' };
   }
 
-  const admin = get<Admin>('SELECT * FROM admin WHERE username = ?', [username]);
+  const adminUser = await db.select().from(admin).where(eq(admin.username, username)).get();
 
-  if (!admin) {
-    logLoginAttempt(ip, username, false);
+  if (!adminUser) {
+    await logLoginAttempt(ip, username, false);
     return { success: false, error: 'Invalid credentials' };
   }
 
-  const valid = await verifyPassword(password, admin.password_hash);
+  const valid = await verifyPassword(password, adminUser.password_hash);
 
   if (!valid) {
-    logLoginAttempt(ip, username, false);
+    await logLoginAttempt(ip, username, false);
     return { success: false, error: 'Invalid credentials' };
   }
 
-  logLoginAttempt(ip, username, true);
+  await logLoginAttempt(ip, username, true);
 
-  const token = await createSession(admin.id);
+  const token = await createSession(adminUser.id);
   const cookieStore = await cookies();
   cookieStore.set(TOKEN_NAME, token, {
     httpOnly: true,
@@ -90,17 +95,19 @@ export async function logout(): Promise<void> {
   cookieStore.delete(TOKEN_NAME);
 }
 
-function logLoginAttempt(ip: string, username: string | null, success: boolean) {
-  run(
-    'INSERT INTO login_attempts (ip, username, success) VALUES (?, ?, ?)',
-    [ip, username || null, success ? 1 : 0]
-  );
+async function logLoginAttempt(ip: string, username: string | null, success: boolean) {
+  await db.insert(loginAttempts).values({
+    ip,
+    username: username || null,
+    success: success,
+    created_at: Math.floor(Date.now() / 1000)
+  });
 }
 
 // Middleware helper
 export async function withAuth(
   request: NextRequest,
-  handler: (admin: Admin) => Promise<NextResponse>
+  handler: (adminUser: typeof admin.$inferSelect) => Promise<NextResponse>
 ): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_NAME)?.value;
 
@@ -113,10 +120,10 @@ export async function withAuth(
     return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
   }
 
-  const admin = get<Admin>('SELECT * FROM admin WHERE id = ?', [payload.userId]);
-  if (!admin) {
+  const adminUser = await db.select().from(admin).where(eq(admin.id, payload.userId)).get();
+  if (!adminUser) {
     return NextResponse.json({ success: false, error: 'User not found' }, { status: 401 });
   }
 
-  return handler(admin);
+  return handler(adminUser);
 }
