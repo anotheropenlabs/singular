@@ -4,6 +4,7 @@ import { Copy, QrCode, Check } from 'lucide-react';
 import { useState } from 'react';
 import Panel from '@/components/ui/Panel';
 import Button from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 import type { NodeUser } from '@/types';
 import QRCode from 'react-qr-code';
 
@@ -27,10 +28,10 @@ export default function SubscriptionCard({ user, subscriptionUrl }: Subscription
       <div className="flex items-center justify-between mb-4 border-b border-[var(--border-color)] pb-4">
         <h3 className="text-[var(--text-primary)] font-mono font-bold uppercase tracking-wider">{user.username}</h3>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={handleCopy} className="rounded-none border border-transparent hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[#10b981]">
-            {copied ? <Check className="w-4 h-4 text-[#10b981]" /> : <Copy className="w-4 h-4" />}
+          <Button variant="ghost" size="sm" onClick={handleCopy} className="text-[var(--text-secondary)] hover:text-[var(--status-success)] transition-none border border-transparent hover:border-[var(--border-color)]">
+            {copied ? <Check className="w-4 h-4 text-[var(--status-success)]" /> : <Copy className="w-4 h-4" />}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setShowQr(!showQr)} className="rounded-none border border-transparent hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+          <Button variant="ghost" size="sm" onClick={() => setShowQr(!showQr)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-none border border-transparent hover:border-[var(--border-color)]">
             <QrCode className="w-4 h-4" />
           </Button>
         </div>
@@ -42,14 +43,14 @@ export default function SubscriptionCard({ user, subscriptionUrl }: Subscription
         <div className="mt-6 pt-6 border-t border-[var(--border-color)] border-dashed flex justify-center">
           <div className="bg-white p-4">
             {subscriptionUrl ? (
-                <QRCode 
-                    value={subscriptionUrl} 
-                    size={200} 
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox={`0 0 256 256`}
-                />
+              <QRCode
+                value={subscriptionUrl}
+                size={200}
+                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                viewBox={`0 0 256 256`}
+              />
             ) : (
-                <p className="text-gray-900 text-sm">No subscription URL available</p>
+              <p className="text-gray-900 text-sm">No subscription URL available</p>
             )}
           </div>
         </div>

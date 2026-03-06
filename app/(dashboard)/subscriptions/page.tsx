@@ -10,6 +10,7 @@ import { useI18n } from '@/lib/i18n';
 import { useUsersData } from '@/hooks/useUsers';
 import { useSubscriptionUrl } from '@/hooks/useSubscriptions';
 import Button from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 export default function SubscriptionsPage() {
   const { t } = useI18n();
@@ -25,10 +26,10 @@ export default function SubscriptionsPage() {
   const handleSelectUser = async (user: NodeUser) => {
     setSelectedUser(user);
     try {
-        const data = await getSubscriptionUrl(user.id);
-        setSubscriptionUrl(data.subscriptionUrl);
+      const data = await getSubscriptionUrl(user.id);
+      setSubscriptionUrl(data.subscriptionUrl);
     } catch {
-        // Handled silently for now, as was the behavior before
+      // Handled silently for now, as was the behavior before
     }
   };
 
@@ -60,12 +61,12 @@ export default function SubscriptionsPage() {
                     key={user.id}
                     onClick={() => handleSelectUser(user)}
                     className={cn(
-                      "w-full h-auto text-left flex justify-start px-4 py-3 hover:bg-[var(--bg-surface-hover)] transition-none border-l-2 rounded-none",
-                      selectedUser?.id === user.id ? 'bg-[var(--bg-surface-hover)] border-[var(--accent-primary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      "w-full h-auto text-left flex flex-col justify-start px-4 py-3 transition-none border-l-2",
+                      selectedUser?.id === user.id ? 'bg-[var(--bg-surface-hover)] border-[var(--accent-primary)] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)]'
                     )}
                   >
-                    <p className="text-[var(--text-primary)] font-mono font-bold uppercase tracking-wider">{user.username}</p>
-                    <p className="text-[var(--text-secondary)] text-[10px] font-mono tracking-widest mt-1">{user.uuid}</p>
+                    <p className="font-mono font-bold uppercase tracking-wider text-[var(--text-primary)] group-hover:text-[var(--text-primary)] transition-colors">{user.username}</p>
+                    <p className="text-[10px] font-mono tracking-widest mt-1 opacity-60">{user.uuid}</p>
                   </Button>
                 ))
               )}

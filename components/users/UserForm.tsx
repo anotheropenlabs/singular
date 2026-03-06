@@ -80,9 +80,14 @@ export default function UserForm({ open, onClose, onSubmit, initialData, inbound
           <h2 className="text-xl font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider">
             {initialData ? t('users.edit_user') : t('users.new_user')}
           </h2>
-          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-sing-red transition-colors p-1 hover:bg-[var(--bg-surface-hover)]">
-            <X className="w-5 h-5" />
-          </button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="w-8 h-8 text-[var(--text-secondary)] hover:text-[var(--status-error)] border-none"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -120,28 +125,29 @@ export default function UserForm({ open, onClose, onSubmit, initialData, inbound
             <label className="text-xs font-mono font-bold text-[var(--text-secondary)] uppercase">{t('users.allowed_inbounds')}</label>
             <div className="flex flex-wrap gap-2">
               {inbounds.map(inbound => (
-                <button
+                <Button
                   key={inbound.id}
                   type="button"
                   onClick={() => toggleInbound(inbound.id)}
+                  variant={allowedInbounds.includes(inbound.id) ? 'primary' : 'ghost'}
                   className={cn(
-                    "px-3 py-1.5 text-sm transition-all font-mono uppercase border rounded-none",
+                    "px-3 py-1.5 h-auto text-[10px] font-mono uppercase transition-all",
                     allowedInbounds.includes(inbound.id)
                       ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border-[var(--accent-primary)]"
-                      : "bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   {inbound.tag}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
           
           <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-[var(--border-color)]">
-            <Button type="button" variant="ghost" onClick={onClose} className="rounded-none border border-[var(--border-color)] hover:bg-[var(--bg-surface-hover)]">
+            <Button type="button" variant="ghost" onClick={onClose} className="border-[var(--border-color)] hover:bg-[var(--bg-surface-hover)]">
               {t('common.cancel')}
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="rounded-none uppercase font-mono tracking-wider min-w-32">
+            <Button type="submit" isLoading={isSubmitting} className="min-w-32">
               {initialData ? t('common.update') : t('common.create')}
             </Button>
           </div>

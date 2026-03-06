@@ -21,7 +21,6 @@ export async function GET() {
             total: sql<number>`${nodeUser.up} + ${nodeUser.down}`
         })
             .from(nodeUser)
-            .where(eq(nodeUser.side, mode))
             .orderBy(desc(sql`${nodeUser.up} + ${nodeUser.down}`))
             .limit(5);
 

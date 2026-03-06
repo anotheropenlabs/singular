@@ -84,7 +84,7 @@ export default function ConnectionsPage() {
 
         const connect = () => {
             eventSource = new EventSource('/api/connections/stream');
-            
+
             eventSource.onopen = () => {
                 setIsLoading(false);
             };
@@ -97,7 +97,7 @@ export default function ConnectionsPage() {
                     if (data.connections) {
                         updateConnections(data.connections, data.downloadTotal, data.uploadTotal);
                     }
-                } catch (err) {}
+                } catch (err) { }
             };
 
             eventSource.onerror = () => {
@@ -254,8 +254,8 @@ export default function ConnectionsPage() {
                             onFocus={() => setSearchFocused(true)}
                             onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
                             className={cn(
-                                "w-full bg-[#000000] border border-[#27272a] h-9 pl-9 pr-9 text-sm font-mono text-[#e4e4e7] placeholder:text-[#52525b] focus:outline-none transition-none rounded-none",
-                                searchFocused && "border-[#3b82f6]"
+                                "w-full bg-[var(--bg-base)] border border-[var(--border-color)] h-9 pl-9 pr-9 text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none transition-all duration-300 rounded-none",
+                                searchFocused && "border-[var(--accent-primary)] shadow-[0_0_15px_-5px_rgba(var(--accent-primary-rgb),0.3)]"
                             )}
                         />
                         {searchTerm && (
@@ -268,7 +268,7 @@ export default function ConnectionsPage() {
                                     setSearchTerm('');
                                 }}
                                 onClick={() => setSearchTerm('')}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-[#71717a] hover:text-[#e4e4e7] hover:bg-transparent transition-none"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--text-secondary)] hover:text-[var(--status-error)] transition-none"
                             >
                                 <XCircle className="w-3.5 h-3.5" />
                             </Button>
@@ -277,10 +277,10 @@ export default function ConnectionsPage() {
 
                     <div className="relative">
                         <Button
-                            variant="ghost"
+                            variant="primary"
                             size="icon"
                             onClick={() => setShowColumns(!showColumns)}
-                            className={cn("w-9 h-9 flex-shrink-0 rounded-none border border-[#27272a] bg-[#000000]", showColumns ? "border-[#3b82f6] text-[#3b82f6]" : "text-[#71717a] hover:text-[#e4e4e7]")}
+                            className={cn("w-9 h-9 flex-shrink-0 bg-[var(--bg-base)]", showColumns ? "border-[var(--accent-primary)] text-[var(--accent-primary)] shadow-glow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")}
                             title="Toggle Columns"
                         >
                             <Settings2 className="w-4 h-4" />
@@ -288,28 +288,29 @@ export default function ConnectionsPage() {
 
                         {/* Column Toggle Dropdown */}
                         {showColumns && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-[#000000] border border-[#3b82f6] p-2 shadow-2xl z-50">
+                            <div className="absolute top-full right-0 mt-1 w-48 bg-[var(--bg-surface)] border border-[var(--accent-primary)] p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                                 <div className="space-y-1">
-                                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3b82f6] block px-2 py-1">COLUMNS</span>
+                                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--accent-primary)] block px-2 py-1 border-b border-[var(--border-color)] mb-1">COLUMNS_FILTER</span>
                                     <div className="flex flex-col">
                                         {COLUMNS.map((f) => (
-                                            <button
+                                            <Button
+                                                variant="ghost"
                                                 key={f.key}
                                                 onClick={() => handleFieldToggle(f.key)}
-                                                className="flex items-center gap-3 px-2 py-1.5 text-xs font-mono text-left w-full hover:bg-[#18181b] transition-none group"
+                                                className="justify-start gap-3 px-2 py-1.5 h-auto text-xs font-mono text-left w-full hover:bg-[var(--bg-surface-hover)] border-none"
                                             >
                                                 <div className={cn(
                                                     "w-3.5 h-3.5 border flex items-center justify-center rounded-[2px]",
                                                     visibleFields.has(f.key)
-                                                        ? "bg-[#3b82f6] border-[#3b82f6] text-[#000000]"
-                                                        : "border-[#3f3f46] text-transparent group-hover:border-[#71717a]"
+                                                        ? "bg-[var(--accent-primary)] border-[var(--accent-primary)] text-[var(--bg-base)]"
+                                                        : "border-[var(--border-color)] text-transparent group-hover:border-[var(--text-secondary)]"
                                                 )}>
                                                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
-                                                <span className={visibleFields.has(f.key) ? "text-[#e4e4e7]" : "text-[#71717a] group-hover:text-[#a1a1aa]"}>{f.label}</span>
-                                            </button>
+                                                <span className={visibleFields.has(f.key) ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]/80"}>{f.label}</span>
+                                            </Button>
                                         ))}
                                     </div>
                                 </div>
@@ -320,18 +321,18 @@ export default function ConnectionsPage() {
 
                 {/* Quick Filter Dropdown */}
                 {searchFocused && (
-                    <div className="absolute top-full left-0 mt-1 w-full max-w-2xl bg-[#000000] border border-[#27272a] p-4 shadow-2xl z-50">
+                    <div className="absolute top-full left-0 mt-1 w-full max-w-2xl bg-[var(--bg-surface)] border border-[var(--accent-primary)] p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-300">
                         <div className="space-y-4">
                             {/* Protocols */}
                             <div>
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717a] mb-2 block">PROTO_FILTER</span>
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">PROTO_FILTER</span>
                                 <div className="flex gap-2">
                                     {PROTOCOLS.map((p) => (
                                         <Button
                                             variant="ghost"
                                             key={p.key}
                                             onClick={() => handleQuickFilter(p.key + ':')}
-                                            className="h-auto px-3 py-1 bg-[#09090b] border border-[#27272a] text-xs font-mono text-[#a1a1aa] hover:border-[#3b82f6] hover:text-[#3b82f6] hover:bg-[#09090b] transition-none rounded-none"
+                                            className="h-auto px-3 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] text-xs font-mono text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] transition-all rounded-none"
                                         >
                                             {p.label}
                                         </Button>
@@ -341,14 +342,14 @@ export default function ConnectionsPage() {
 
                             {/* Fields */}
                             <div>
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717a] mb-2 block">DATA_TUPLES</span>
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">DATA_TUPLES</span>
                                 <div className="flex gap-2 flex-wrap">
                                     {FILTERS.map((f) => (
                                         <Button
                                             variant="ghost"
                                             key={f.key}
                                             onClick={() => handleQuickFilter(f.prefix)}
-                                            className="h-auto px-3 py-1 bg-[#09090b] border border-[#27272a] text-xs font-mono text-[#a1a1aa] hover:border-[#3b82f6] hover:text-[#3b82f6] hover:bg-[#09090b] transition-none flex items-center gap-1.5 rounded-none"
+                                            className="h-auto px-3 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] text-xs font-mono text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] transition-all flex items-center gap-1.5 rounded-none"
                                         >
                                             {f.label}
                                         </Button>

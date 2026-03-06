@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { SystemMode } from '@/types';
 import { toast } from 'sonner';
 import { useSystemMode } from '@/hooks/useSystemSettings';
+import Button from '@/components/ui/Button';
 
 const NAV_INDEX = [
   { href: '/dashboard',    label: 'Dashboard' },
@@ -111,17 +112,18 @@ export default function HeaderCard({ username }: HeaderCardProps) {
             "shadow-[0_20px_60px_rgba(0,0,0,0.6)]",
           )}>
             {results.map((item, i) => (
-              <button
+              <Button
+                variant="ghost"
                 key={item.href}
                 onMouseDown={() => handleSelect(item.href)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                  "w-full justify-start gap-3 px-4 py-2.5 h-auto border-none",
                   "hover:bg-white/[0.06]",
                   i !== 0 && "border-t border-white/[0.04]",
                 )}
               >
                 <span className="text-sm text-white/80 font-medium">{item.label}</span>
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -131,33 +133,31 @@ export default function HeaderCard({ username }: HeaderCardProps) {
       <div className="flex items-center gap-4 shrink-0">
         {/* System Mode Toggle */}
         <div className="flex bg-[var(--bg-base)] border border-[var(--border-color)] p-0.5 shrink-0">
-          <button
-            type="button"
+          <Button
+            variant={systemMode === 'server' ? 'primary' : 'ghost'}
             disabled={setMode.isPending}
             onClick={() => handleModeSwitch('server')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
-              systemMode === 'server'
-                ? 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:border-[var(--border-color)]'
-            }`}
+            className={cn(
+              "h-8 px-3 text-[10px] border-none shadow-none",
+              systemMode === 'server' ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
+            )}
           >
             <Monitor className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t('settings.server_mode', 'Server')}</span>
-          </button>
-          <div className="w-px bg-[var(--border-color)]" />
-          <button
-            type="button"
+            <span className="hidden sm:inline ml-1.5">{t('settings.server_mode', 'Server')}</span>
+          </Button>
+          <div className="w-px bg-[var(--border-color)] my-1" />
+          <Button
+            variant={systemMode === 'client' ? 'primary' : 'ghost'}
             disabled={setMode.isPending}
             onClick={() => handleModeSwitch('client')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
-              systemMode === 'client'
-                ? 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:border-[var(--border-color)]'
-            }`}
+            className={cn(
+              "h-8 px-3 text-[10px] border-none shadow-none",
+              systemMode === 'client' ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
+            )}
           >
             <Globe className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t('settings.client_mode', 'Client')}</span>
-          </button>
+            <span className="hidden sm:inline ml-1.5">{t('settings.client_mode', 'Client')}</span>
+          </Button>
         </div>
 
         {/* Docs */}
@@ -173,10 +173,10 @@ export default function HeaderCard({ username }: HeaderCardProps) {
             </a>
 
             {/* Notifications (decorative) */}
-            <button className="relative p-2 border border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)] hover:bg-[var(--bg-base)] transition-all duration-150">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[var(--accent-primary)]" />
-            </button>
+            <Button variant="ghost" size="sm" className="w-8 h-8 p-0 border-none relative text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[var(--accent-primary)]" />
+            </Button>
         </div>
 
         {/* Divider */}
@@ -184,11 +184,12 @@ export default function HeaderCard({ username }: HeaderCardProps) {
 
         {/* User profile */}
         <div className="relative" ref={profileRef}>
-            <button 
+            <Button 
+              variant="ghost"
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className={cn(
-                "flex items-center gap-2 pl-2 pr-2 py-1 hover:bg-[var(--bg-base)] transition-all duration-150 group border border-[var(--border-color)]",
-                showProfileMenu && "bg-[var(--bg-base)] border-[var(--accent-primary)]"
+                "flex items-center gap-2 pl-2 pr-2 h-9 transition-all duration-150 group border border-[var(--border-color)]",
+                showProfileMenu && "bg-[var(--bg-base)] border-[var(--accent-primary)] shadow-glow-sm"
               )}
             >
               <div className="w-6 h-6 bg-[var(--bg-surface)] border border-[var(--border-color)] flex items-center justify-center">
@@ -197,7 +198,7 @@ export default function HeaderCard({ username }: HeaderCardProps) {
                 </span>
               </div>
               <ChevronDown className={cn("w-3.5 h-3.5 text-[var(--text-secondary)] transition-transform duration-200 hidden sm:block", showProfileMenu && "rotate-180")} />
-            </button>
+            </Button>
 
             {/* Profile Popover Menu */}
             {showProfileMenu && (
@@ -206,26 +207,28 @@ export default function HeaderCard({ username }: HeaderCardProps) {
                         <p className="text-sm font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider truncate">{username ?? 'admin'}</p>
                         <p className="text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-widest truncate">{t('auth.admin', 'System Admin')}</p>
                     </div>
-                    <button 
+                    <Button 
+                        variant="ghost"
                         onClick={() => {
                             setShowProfileMenu(false);
                             setShowEditProfile(true);
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-[var(--text-primary)] hover:bg-[var(--bg-base)] border border-transparent hover:border-[var(--border-color)] text-[10px] font-mono uppercase tracking-wider font-bold transition-colors mb-0.5"
+                        className="justify-start gap-2 w-full px-3 py-2 h-auto text-[10px] font-mono uppercase tracking-wider font-bold transition-colors border-none mb-0.5"
                     >
                         <Pencil className="w-3.5 h-3.5" />
                         {t('auth.edit_profile', 'Edit Profile')}
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
+                        variant="ghost"
                         onClick={() => {
                             setShowProfileMenu(false);
                             setShowLogoutConfirm(true);
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sing-red hover:bg-sing-red/10 border border-transparent hover:border-sing-red/30 text-[10px] font-mono uppercase tracking-wider font-bold transition-colors"
+                        className="justify-start gap-2 w-full px-3 py-2 text-[var(--status-error)] hover:bg-[var(--status-error)]/10 hover:text-[var(--status-error)] h-auto text-[10px] font-mono uppercase tracking-wider font-bold transition-colors border-none"
                     >
                         <LogOut className="w-3.5 h-3.5" />
                         {t('auth.sign_out', 'Log out')}
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

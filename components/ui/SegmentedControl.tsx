@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import Button from './Button';
 
 export interface SegmentedControlProps<T extends string = string> {
   options: { label: ReactNode; value: T }[];
@@ -23,16 +24,16 @@ export default function SegmentedControl<T extends string = string>({
       {options.map((option, index) => (
         <div key={String(option.value)} className="flex items-center">
           {index > 0 && <div className="w-px h-full bg-[var(--border-color)]" />}
-          <button
-            type="button"
+          <Button
+            variant={value === option.value ? 'primary' : 'ghost'}
             onClick={() => onChange(option.value)}
             className={cn(
-              "px-4 py-1.5 text-xs font-mono font-bold tracking-wider uppercase transition-all h-full outline-none",
+              "px-4 py-1.5 h-auto text-[10px] font-mono font-bold tracking-widest uppercase transition-all shadow-none border-none",
               value === option.value ? activeClassName : inactiveClassName
             )}
           >
             {option.label}
-          </button>
+          </Button>
         </div>
       ))}
     </div>

@@ -1,9 +1,9 @@
 'use client';
 
-import { 
-  Server, 
-  Users, 
-  Activity, 
+import {
+  Server,
+  Users,
+  Activity,
   Cpu,
   MemoryStick,
   ShieldAlert
@@ -26,10 +26,10 @@ import PageHeader from '@/components/layout/PageHeader';
 
 const TRAFFIC_RANGES = [
   { key: 'analytics.range_30m', minutes: 30 },
-  { key: 'analytics.range_1h',  minutes: 60 },
-  { key: 'analytics.range_6h',  minutes: 360 },
+  { key: 'analytics.range_1h', minutes: 60 },
+  { key: 'analytics.range_6h', minutes: 360 },
   { key: 'analytics.range_24h', minutes: 1440 },
-  { key: 'analytics.range_7d',  minutes: 10080 },
+  { key: 'analytics.range_7d', minutes: 10080 },
 ] as const;
 
 
@@ -72,67 +72,67 @@ export default function DashboardPage() {
           <>
             {/* System Status Block */}
             <div className={cn(
-                "px-3 py-1 flex items-center gap-2 border font-mono text-xs uppercase tracking-widest font-bold",
-                stats?.status === 'running' 
-                    ? "border-[#10b981]/50 text-[#10b981] bg-[#10b981]/10" 
-                    : "border-[#e11d48]/50 text-[#e11d48] bg-[#e11d48]/10"
+              "h-8 px-4 flex items-center gap-1.5 border font-mono text-[10px] uppercase tracking-widest font-bold",
+              stats?.status === 'running'
+                ? "border-[var(--status-success)]/30 text-[var(--status-success)] bg-[var(--status-success)]/5"
+                : "border-[var(--status-error)]/30 text-[var(--status-error)] bg-[var(--status-error)]/5"
             )}>
-                <div className={cn("w-1.5 h-1.5 rounded-none", stats?.status === 'running' ? "bg-[#10b981]" : "bg-[#e11d48]")} />
-                {stats?.status || 'UNKNOWN'}
+              <div className={cn("w-1.5 h-1.5 rounded-none", stats?.status === 'running' ? "bg-[var(--status-success)] animate-[blink_2s_ease-in-out_infinite]" : "bg-[var(--status-error)]")} />
+              {stats?.status || 'UNKNOWN'}
             </div>
             {stats?.status === 'running' && (
-                <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleActionClick('restart')}
-                    isLoading={executeAction.isPending && confirmAction === 'restart'}
-                >
-                    {t('dashboard.restart_core')}
-                </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleActionClick('restart')}
+                isLoading={executeAction.isPending && confirmAction === 'restart'}
+              >
+                {t('dashboard.restart_core')}
+              </Button>
             )}
           </>
         }
       />
 
       <div className={`grid gap-4 grid-cols-2 ${isServer ? 'md:grid-cols-3 lg:grid-cols-5' : 'md:grid-cols-2 lg:grid-cols-4'}`}>
-        <MetricCard 
+        <MetricCard
           title={t('dashboard.inbounds')}
-          value={stats?.inbounds || 0} 
-          icon={Server} 
+          value={stats?.inbounds || 0}
+          icon={Server}
           color="blue"
           breakdown={stats?.inboundsProtocol}
           className="h-32"
         />
         {isServer && (
-          <MetricCard 
-            title={t('dashboard.users')} 
-            value={stats?.users || 0} 
-            icon={Users} 
+          <MetricCard
+            title={t('dashboard.users')}
+            value={stats?.users || 0}
+            icon={Users}
             color="purple"
             className="h-32"
           />
         )}
-        <MetricCard 
-          title={t('dashboard.connections')} 
-          value={stats?.connections || 0} 
-          icon={Activity} 
+        <MetricCard
+          title={t('dashboard.connections')}
+          value={stats?.connections || 0}
+          icon={Activity}
           color="green"
           className="h-32"
           chartData={connectionHistory}
         />
-        <MetricCard 
-          title={t('dashboard.cpu')} 
-          value={stats?.cpu || '0%'} 
-          icon={Cpu} 
+        <MetricCard
+          title={t('dashboard.cpu')}
+          value={stats?.cpu || '0%'}
+          icon={Cpu}
           color="blue"
           className="h-32"
           chartData={cpuHistory}
           tooltip={t('dashboard.cpu_tooltip')}
         />
-        <MetricCard 
-          title={t('dashboard.memory')} 
-          value={stats?.memory?.split(' / ')[0] || '0 MB'} 
-          icon={MemoryStick} 
+        <MetricCard
+          title={t('dashboard.memory')}
+          value={stats?.memory?.split(' / ')[0] || '0 MB'}
+          icon={MemoryStick}
           color="purple"
           className="h-32"
           chartData={memoryHistory}
@@ -144,33 +144,33 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 relative h-[450px]">
           <Panel className="absolute inset-0 p-5" variant="elevated" innerClassName="h-full flex flex-col">
             <div className="flex justify-between items-center mb-4 gap-4">
-                <div className="min-w-0">
-                   <h3 className="text-sm font-mono font-bold text-[#e4e4e7] uppercase tracking-wider">{t('dashboard.traffic_overview')}</h3>
-                   <p className="text-[10px] font-mono text-[#71717a] mt-1 uppercase">BANDWIDTH CONSUMPTION OVER TIME</p>
+              <div className="min-w-0">
+                <h3 className="text-sm font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider">{t('dashboard.traffic_overview')}</h3>
+                <p className="text-[10px] font-mono text-[var(--text-secondary)] mt-1 uppercase">BANDWIDTH CONSUMPTION OVER TIME</p>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                {/* DL / UL totals */}
+                <div className="flex gap-4 text-[10px] font-mono tracking-widest font-bold">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-[var(--accent-primary)] shrink-0" />
+                    <span className="text-[var(--text-secondary)] whitespace-nowrap uppercase">DL {formatBytes(stats?.traffic?.totalDown || 0)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-[var(--status-success)] shrink-0" />
+                    <span className="text-[var(--text-secondary)] whitespace-nowrap uppercase">UL {formatBytes(stats?.traffic?.totalUp || 0)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                    {/* DL / UL totals */}
-                    <div className="flex gap-4 text-[10px] font-mono tracking-widest font-bold">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-[#3b82f6] shrink-0" />
-                            <span className="text-[#a1a1aa] whitespace-nowrap">DL {formatBytes(stats?.traffic?.totalDown || 0)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-[#22d3ee] shrink-0" />
-                            <span className="text-[#a1a1aa] whitespace-nowrap">UL {formatBytes(stats?.traffic?.totalUp || 0)}</span>
-                        </div>
-                    </div>
-                    {/* Time range selector */}
-                    <Select
-                      value={trafficMinutes}
-                      onChange={(e) => setTrafficMinutes(Number(e.target.value))}
-                      className="h-7 text-[10px] py-0 w-36"
-                    >
-                      {TRAFFIC_RANGES.map((r) => (
-                        <option key={r.minutes} value={r.minutes}>{t(r.key)}</option>
-                      ))}
-                    </Select>
-                </div>
+                {/* Time range selector */}
+                <Select
+                  value={trafficMinutes}
+                  onChange={(e) => setTrafficMinutes(Number(e.target.value))}
+                  className="h-7 text-[10px] py-0 w-36"
+                >
+                  {TRAFFIC_RANGES.map((r) => (
+                    <option key={r.minutes} value={r.minutes}>{t(r.key)}</option>
+                  ))}
+                </Select>
+              </div>
             </div>
             <div className="flex-1 w-full min-h-0">
               <TrafficTrendChart
@@ -184,40 +184,40 @@ export default function DashboardPage() {
 
         <div className="relative h-[450px]">
           <Panel className="absolute inset-0 p-5 flex flex-col" variant="elevated">
-             <div className="mb-6">
-                <h3 className="text-sm font-mono font-bold text-[#e4e4e7] uppercase tracking-wider">{t('dashboard.system_status')}</h3>
-                <p className="text-[10px] font-mono text-[#71717a] mt-1 uppercase">RUNTIME ENVIRONMENT DETAILS</p>
-             </div>
-            
-            <div className="flex-1 flex flex-col justify-center space-y-4">
-               {/* Hexdump / Raw Data Style Area */}
-               <div className="bg-[#000000] border border-[#27272a] p-4 text-xs font-mono text-[#a1a1aa] leading-relaxed select-text overflow-hidden">
-                   <div className="flex justify-between border-b border-[#27272a] pb-2 mb-2">
-                      <span className="text-[#71717a]">VERSION_INF</span>
-                      <span className="text-[#3b82f6] font-bold">{stats?.version || 'UNKNOWN'}</span>
-                   </div>
-                   <div className="flex justify-between border-b border-[#27272a] pb-2 mb-2">
-                      <span className="text-[#71717a]">UPTIME_DUR</span>
-                      <span className="text-[#e4e4e7]">{stats?.uptime || '0s'}</span>
-                   </div>
-                   <div className="flex justify-between border-b border-[#27272a] pb-2 mb-2">
-                      <span className="text-[#71717a]">BIN_ARCH</span>
-                      <span className="text-[#e4e4e7]">amd64 (Expected)</span>
-                   </div>
-                   <div className="flex justify-between border-[#27272a]">
-                      <span className="text-[#71717a]">PROC_MEM</span>
-                      <span className="text-[#e4e4e7]">{stats?.memory || 'N/A'}</span>
-                   </div>
-               </div>
+            <div className="mb-6">
+              <h3 className="text-sm font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider">{t('dashboard.system_status')}</h3>
+              <p className="text-[10px] font-mono text-[var(--text-secondary)] mt-1 uppercase">RUNTIME ENVIRONMENT DETAILS</p>
+            </div>
 
-                <div className="mt-auto grid grid-cols-2 gap-2">
-                    <Button variant="secondary" onClick={() => handleActionClick('stop')} disabled={stats?.status !== 'running'}>
-                        HALT ENGINE
-                    </Button>
-                    <Button variant="primary" onClick={() => handleActionClick('start')} disabled={stats?.status === 'running'}>
-                        BOOT ENGINE
-                    </Button>
+            <div className="flex-1 flex flex-col justify-center space-y-4">
+              {/* Hexdump / Raw Data Style Area */}
+              <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-4 text-xs font-mono text-[var(--text-secondary)] leading-relaxed select-text overflow-hidden">
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-2 mb-2">
+                  <span className="text-[var(--text-secondary)] uppercase">VERSION_INF</span>
+                  <span className="text-[var(--accent-primary)] font-bold">{stats?.version || 'UNKNOWN'}</span>
                 </div>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-2 mb-2">
+                  <span className="text-[var(--text-secondary)] uppercase">UPTIME_DUR</span>
+                  <span className="text-[var(--text-primary)]">{stats?.uptime || '0s'}</span>
+                </div>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-2 mb-2">
+                  <span className="text-[var(--text-secondary)] uppercase">BIN_ARCH</span>
+                  <span className="text-[var(--text-primary)]">AMD64 / LINUX</span>
+                </div>
+                <div className="flex justify-between border-[var(--border-color)]">
+                  <span className="text-[var(--text-secondary)] uppercase">PROC_MEM</span>
+                  <span className="text-[var(--text-primary)]">{stats?.memory || 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="mt-auto grid grid-cols-2 gap-2">
+                <Button variant="secondary" onClick={() => handleActionClick('stop')} disabled={stats?.status !== 'running'}>
+                  HALT ENGINE
+                </Button>
+                <Button variant="primary" onClick={() => handleActionClick('start')} disabled={stats?.status === 'running'}>
+                  BOOT ENGINE
+                </Button>
+              </div>
             </div>
           </Panel>
         </div>

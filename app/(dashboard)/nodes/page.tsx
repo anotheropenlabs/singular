@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import Panel from '@/components/ui/GlassCard';
+import GlassCard from '@/components/ui/GlassCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import PageHeader from '@/components/layout/PageHeader';
@@ -11,8 +11,8 @@ import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Checkbox } from '@/components/ui/Checkbox';
 import {
-    Globe, RefreshCw, Filter, Zap, Search, ArrowUpDown, Trash2,
-    Edit3, Link, Info, CheckSquare, Square
+    Globe, Filter, Zap, Search, ArrowUpDown, Trash2,
+    Edit3, Link, Info, CheckSquare, Square, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -81,11 +81,11 @@ export default function NodesPage() {
     };
 
     const getLatencyColor = (latency?: number | null) => {
-        if (!latency) return 'text-[#71717a]'; // null, 0, undefined
-        if (latency < 0) return 'text-[#e11d48]'; // -1 for error/timeout
-        if (latency < 150) return 'text-[#10b981]';
-        if (latency < 400) return 'text-[#f59e0b]';
-        return 'text-[#e11d48]';
+        if (!latency) return 'text-[var(--text-secondary)]'; // null, 0, undefined
+        if (latency < 0) return 'text-[var(--status-error)]'; // -1 for error/timeout
+        if (latency < 150) return 'text-[var(--status-success)]';
+        if (latency < 400) return 'text-[var(--status-warning)]';
+        return 'text-[var(--status-error)]';
     };
 
     const formatLatency = (latency?: number | null) => {
@@ -278,76 +278,77 @@ export default function NodesPage() {
     return (
         <div className="space-y-4 max-w-7xl mx-auto flex flex-col">
             <PageHeader
-                title="Proxy Nodes"
+                title="PROXY NODES"
                 actions={
                     selectedNodeIds.size > 0 ? (
                         <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                            <span className="text-[#3b82f6] font-bold text-sm mr-2">{selectedNodeIds.size} <span className="text-[#a1a1aa] text-[10px] tracking-widest font-normal ml-1 border-r border-[#27272a] pr-3 mr-1">SELECTED</span></span>
-                            <Button size="sm" variant="outline" className="h-8 border-[#27272a] hover:border-[#10b981] hover:bg-transparent hover:text-[#10b981] tracking-widest text-[10px] px-3" onClick={() => handleBatchToggle(true)}>
+                            <span className="text-[var(--accent-primary)] font-bold text-sm mr-2">{selectedNodeIds.size} <span className="text-[var(--text-secondary)] text-[10px] tracking-widest font-normal ml-1 border-r border-[var(--border-color)] pr-3 mr-1">SELECTED</span></span>
+                            <Button size="sm" variant="outline" className="h-8 border-[var(--border-color)] hover:border-[var(--status-success)] hover:bg-transparent hover:text-[var(--status-success)] tracking-widest text-[10px] px-3 transition-none" onClick={() => handleBatchToggle(true)}>
                                 ENABLE
                             </Button>
-                            <Button size="sm" variant="outline" className="h-8 border-[#27272a] hover:border-[#f59e0b] hover:bg-transparent hover:text-[#f59e0b] tracking-widest text-[10px] px-3" onClick={() => handleBatchToggle(false)}>
+                            <Button size="sm" variant="outline" className="h-8 border-[var(--border-color)] hover:border-[var(--status-warning)] hover:bg-transparent hover:text-[var(--status-warning)] tracking-widest text-[10px] px-3 transition-none" onClick={() => handleBatchToggle(false)}>
                                 DISABLE
                             </Button>
-                            <span className="text-[#27272a] mx-1">|</span>
-                            <Button size="sm" variant="ghost" className="h-8 text-[#e11d48] hover:bg-transparent hover:text-[#f43f5e] tracking-widest text-[10px] px-2" onClick={() => setBatchActionType('delete')}>
+                            <span className="text-[var(--border-color)] mx-1">|</span>
+                            <Button size="sm" variant="ghost" className="h-8 text-[var(--status-error)] hover:bg-transparent hover:text-[var(--status-error)]/80 tracking-widest text-[10px] px-2 transition-none" onClick={() => setBatchActionType('delete')}>
                                 <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                                 DELETE
                             </Button>
-                            <span className="text-[#27272a] mx-1">|</span>
-                            {/* Option to clear selection */}
-                            <Button size="sm" variant="ghost" className="h-8 text-[#71717a] hover:bg-transparent hover:text-[#e4e4e7] tracking-widest text-[10px] px-2" onClick={() => setSelectedNodeIds(new Set())}>
+                            <span className="text-[var(--border-color)] mx-1">|</span>
+                            <Button size="sm" variant="ghost" className="h-8 text-[var(--text-secondary)] hover:bg-transparent hover:text-[var(--text-primary)] tracking-widest text-[10px] px-2 transition-none" onClick={() => setSelectedNodeIds(new Set())}>
                                 CANCEL
                             </Button>
                         </div>
                     ) : (
-                        <>
+                        <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={handleTestAll}
                                 disabled={testingAll || isLoading}
+                                className="transition-none"
                             >
-                                <Zap className={cn('w-4 h-4 mr-2', testingAll && 'animate-pulse text-[#f59e0b]')} />
-                                {testingAll ? t('proxies.testing') : t('proxies.test_latency')}
+                                <Zap className={cn('w-4 h-4 mr-2', testingAll && 'animate-pulse text-[var(--status-warning)]')} />
+                                {testingAll ? 'TESTING...' : 'TEST_LATENCY'}
                             </Button>
                             <Button
                                 variant="primary"
                                 size="sm"
                                 onClick={() => { resetAddForm(); setShowAddModal(true); }}
+                                className="transition-none"
                             >
-                                NEW ENDPOINT
+                                NEW_ENDPOINT
                             </Button>
-                        </>
+                        </div>
                     )
                 }
             />
 
             {/* Controls Bar */}
-            <div className="flex justify-between items-center gap-4 flex-shrink-0 bg-[#09090b] border border-[#27272a] p-2">
+            <div className="flex justify-between items-center gap-4 flex-shrink-0 bg-[var(--bg-surface)] border border-[var(--border-color)] p-2">
                 <div className="flex flex-1 items-center max-w-md relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717a]" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="FILTER_ENDPOINTS..."
-                        className="w-full bg-[#000000] border border-[#27272a] h-9 pl-9 pr-3 text-sm font-mono text-[#e4e4e7] placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6] transition-none"
+                        className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] h-9 pl-9 pr-3 text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-primary)] transition-none"
                     />
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     {/* Provider Filter */}
                     {providers.length > 0 && (
                         <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-mono text-[#71717a] mr-2">PROVIDER:</span>
+                            <span className="text-[10px] font-mono text-[var(--text-secondary)] mr-2">PROVIDER:</span>
                             <Button
                                 variant="ghost"
                                 onClick={() => setSelectedProvider(null)}
                                 className={cn(
                                     'h-auto px-2 py-1 text-[10px] font-mono border uppercase tracking-widest rounded-none transition-none',
                                     selectedProvider === null
-                                        ? 'bg-[#e4e4e7]/10 text-[#e4e4e7] border-[#e4e4e7]/30 hover:bg-[#e4e4e7]/20 hover:text-[#e4e4e7]'
-                                        : 'bg-transparent text-[#71717a] border-[#27272a] hover:border-[#3f3f46] hover:bg-[#18181b]'
+                                        ? 'bg-[var(--text-primary)]/10 text-[var(--text-primary)] border-[var(--text-primary)]/30 hover:bg-[var(--text-primary)]/20 hover:text-[var(--text-primary)]'
+                                        : 'bg-transparent text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]'
                                 )}
                             >
                                 ALL
@@ -360,8 +361,8 @@ export default function NodesPage() {
                                     className={cn(
                                         'h-auto px-2 py-1 text-[10px] font-mono border uppercase tracking-widest rounded-none transition-none',
                                         selectedProvider === p.id
-                                            ? 'bg-[#3b82f6]/10 text-[#3b82f6] border-[#3b82f6]/30 hover:bg-[#3b82f6]/20 hover:text-[#3b82f6]'
-                                            : 'bg-transparent text-[#71717a] border-[#27272a] hover:border-[#3f3f46] hover:bg-[#18181b]'
+                                            ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)]/20 hover:text-[var(--accent-primary)]'
+                                            : 'bg-transparent text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]'
                                     )}
                                 >
                                     {p.name}
@@ -374,73 +375,73 @@ export default function NodesPage() {
             </div>
 
             {/* Data Grid */}
-            <Panel variant="elevated" className="w-full rounded-none relative pb-16">
-                {/* Table Header */}
-                <div className={cn("grid gap-4 px-4 py-3 border-b border-[#27272a] text-[10px] font-medium text-[#52525b] uppercase tracking-wider items-center", tableGridLayout)}>
-                    <div className="flex items-center justify-center">
-                        <Checkbox 
-                            checked={isAllSelected}
-                            indeterminate={isSomeSelected}
-                            onCheckedChange={toggleSelectAll}
-                        />
-                    </div>
-                    <div 
-                        className="cursor-pointer hover:text-[#e4e4e7] flex items-center gap-1 group"
-                        onClick={() => setSortBy(s => s === 'name' ? 'default' : 'name')}
-                    >
-                        IDENTIFIER
-                        <ArrowUpDown className={cn("w-3 h-3 transition-colors", sortBy === 'name' ? "text-[#3b82f6]" : "text-[#52525b] opacity-40 group-hover:opacity-100")} />
-                    </div>
-                    <div>TYPE</div>
-                    <div>SOURCE</div>
-                    <div>SERVER</div>
-                    <div>PORT</div>
-                    <div 
-                        className="flex items-center gap-1 group relative"
-                    >
-                        <div 
-                            className="cursor-pointer hover:text-[#e4e4e7] flex items-center gap-1"
-                            onClick={() => setSortBy(s => s === 'latency' ? 'default' : 'latency')}
-                        >
-                            LATENCY
-                            <ArrowUpDown className={cn("w-3 h-3 transition-colors", sortBy === 'latency' ? "text-[#3b82f6]" : "text-[#52525b] opacity-40 group-hover:opacity-100")} />
+            {isLoading ? (
+                <div className="flex justify-center items-center h-48">
+                    <div className="w-2 h-4 bg-[var(--text-primary)] animate-pulse" />
+                </div>
+            ) : displayNodes.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-[var(--text-secondary)] font-mono border border-dashed border-[var(--border-color)] bg-[var(--bg-base)]">
+                    <Globe className="w-8 h-8 mb-4 opacity-20" />
+                    <p className="text-xs tracking-widest uppercase">[{search ? 'NO_MATCHING_ENDPOINTS' : 'NO_ENDPOINTS_FOUND'}]</p>
+                </div>
+            ) : (
+                <GlassCard variant="elevated" className="w-full rounded-none relative pb-16">
+                    {/* Table Header */}
+                    <div className={cn("grid gap-4 px-4 py-3 border-b border-[var(--border-color)] text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider items-center", tableGridLayout)}>
+                        <div className="flex items-center justify-center">
+                            <Checkbox
+                                checked={isAllSelected}
+                                indeterminate={isSomeSelected}
+                                onCheckedChange={toggleSelectAll}
+                            />
                         </div>
-                        <div className="group/tip relative flex items-center cursor-help">
-                            <Info className="w-3 h-3 text-[#52525b] hover:text-[#a1a1aa]" />
-                            <div className="absolute opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity bg-[#18181b] border border-[#27272a] text-[#a1a1aa] px-2 py-1.5 rounded-none text-[10px] whitespace-nowrap right-0 top-full mt-1 z-50 normal-case tracking-normal">
-                                Tested via TCP ping to Target Addr
+                        <div
+                            className="cursor-pointer hover:text-[var(--text-primary)] flex items-center gap-1 group"
+                            onClick={() => setSortBy(s => s === 'name' ? 'default' : 'name')}
+                        >
+                            IDENTIFIER
+                            <ArrowUpDown className={cn("w-3 h-3 transition-colors", sortBy === 'name' ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)] opacity-40 group-hover:opacity-100")} />
+                        </div>
+                        <div>TYPE</div>
+                        <div>SOURCE</div>
+                        <div>SERVER</div>
+                        <div>PORT</div>
+                        <div
+                            className="flex items-center gap-1 group relative"
+                        >
+                            <div
+                                className="cursor-pointer hover:text-[var(--text-primary)] flex items-center gap-1"
+                                onClick={() => setSortBy(s => s === 'latency' ? 'default' : 'latency')}
+                            >
+                                LATENCY
+                                <ArrowUpDown className={cn("w-3 h-3 transition-colors", sortBy === 'latency' ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)] opacity-40 group-hover:opacity-100")} />
+                            </div>
+                            <div className="group/tip relative flex items-center cursor-help">
+                                <Info className="w-3 h-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)]" />
+                                <div className="absolute opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-secondary)] px-2 py-1.5 rounded-none text-[10px] whitespace-nowrap right-0 top-full mt-1 z-50 normal-case tracking-normal">
+                                    Tested via TCP ping to Target Addr
+                                </div>
                             </div>
                         </div>
+                        <div>ACTIONS</div>
                     </div>
-                    <div>ACTIONS</div>
-                </div>
 
-                {/* Table Body */}
-                <div className="bg-[#000000]">
-                    {isLoading ? (
-                        <div className="p-8 text-center flex justify-center items-center h-48">
-                            <div className="w-2 h-4 bg-[#e4e4e7] animate-pulse" />
-                        </div>
-                    ) : displayNodes.length === 0 ? (
-                        <div className="p-12 min-h-[300px] flex flex-col items-center justify-center text-[#71717a] font-mono">
-                            <Globe className="w-8 h-8 mb-4 opacity-20" />
-                            <p className="text-xs tracking-widest uppercase">[{search ? 'NO_MATCHING_ENDPOINTS' : 'NO_ENDPOINTS_FOUND'}]</p>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-[#27272a]/50">
+                    {/* Table Body */}
+                    <div className="bg-[var(--bg-base)]">
+                        <div className="divide-y divide-[var(--border-color)]/30">
                             {displayNodes?.map((node) => (
-                                <div 
-                                    key={node.id} 
+                                <div
+                                    key={node.id}
                                     className={cn(
-                                        "grid gap-4 px-4 py-3 items-center hover:bg-[#27272a]/20 transition-colors group",
+                                        "grid gap-4 px-4 py-3 items-center hover:bg-[var(--bg-surface-hover)]/30 transition-colors group",
                                         tableGridLayout,
-                                        selectedNodeIds.has(node.id) && "bg-[#3b82f6]/5 hover:bg-[#3b82f6]/10",
+                                        selectedNodeIds.has(node.id) && "bg-[var(--accent-primary)]/5 hover:bg-[var(--accent-primary)]/10",
                                         !node.enabled && 'opacity-30 grayscale'
                                     )}
                                 >
                                     {/* 0. Checkbox */}
                                     <div className="flex items-center justify-center">
-                                        <Checkbox 
+                                        <Checkbox
                                             checked={selectedNodeIds.has(node.id)}
                                             onCheckedChange={() => toggleSelectNode(node.id)}
                                         />
@@ -448,7 +449,7 @@ export default function NodesPage() {
 
                                     {/* 1. Identifier */}
                                     <div className="flex flex-col min-w-0">
-                                        <span className="text-sm font-mono text-[#e4e4e7] truncate">{node.name}</span>
+                                        <span className="text-sm font-mono text-[var(--text-primary)] truncate">{node.name}</span>
                                     </div>
 
                                     {/* 2. Type */}
@@ -457,17 +458,17 @@ export default function NodesPage() {
                                     </div>
 
                                     {/* 3. Provider/SRC */}
-                                    <div className="font-mono text-[10px] text-[#71717a] truncate uppercase">
+                                    <div className="font-mono text-[10px] text-[var(--text-secondary)] truncate uppercase">
                                         {node.provider_name || '---'}
                                     </div>
 
                                     {/* 4. Server */}
-                                    <div className="font-mono text-xs text-[#a1a1aa] truncate">
+                                    <div className="font-mono text-xs text-[var(--text-secondary)] truncate">
                                         {node.server}
                                     </div>
 
                                     {/* 5. Port */}
-                                    <div className="font-mono text-[10px] text-[#52525b]">
+                                    <div className="font-mono text-[10px] text-[var(--text-secondary)] opacity-80">
                                         {node.port}
                                     </div>
 
@@ -483,9 +484,9 @@ export default function NodesPage() {
                                             size="icon"
                                             onClick={() => handleTestSingle(node.id)}
                                             disabled={testingNodeIds.has(node.id)}
-                                            className="w-6 h-6 hover:bg-[#18181b]"
+                                            className="w-6 h-6 hover:bg-[var(--bg-surface)]"
                                         >
-                                            <Zap className={cn("w-3 h-3 text-[#a1a1aa]", testingNodeIds.has(node.id) && "animate-pulse text-[#f59e0b]")} />
+                                            <Zap className={cn("w-3 h-3 text-[var(--text-secondary)]", testingNodeIds.has(node.id) && "animate-pulse text-[var(--status-warning)]")} />
                                         </Button>
                                         <Button
                                             variant="ghost"
@@ -493,9 +494,9 @@ export default function NodesPage() {
                                             onClick={() => handleToggleEnabled(node.id, !node.enabled)}
                                             className={cn(
                                                 "w-10 h-6 border font-mono text-[10px]",
-                                                node.enabled 
-                                                    ? "bg-[#10b981]/10 text-[#10b981] border-[#10b981]/30 hover:bg-[#10b981]/20 hover:text-[#10b981]" 
-                                                    : "text-[#71717a] border-[#27272a] hover:border-[#3f3f46] hover:bg-[#18181b] hover:text-[#a1a1aa]"
+                                                node.enabled
+                                                    ? "bg-[var(--status-success)]/10 text-[var(--status-success)] border-[var(--status-success)]/30 hover:bg-[var(--status-success)]/20 hover:text-[var(--status-success)]"
+                                                    : "text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
                                             )}
                                         >
                                             {node.enabled ? 'ON' : 'OFF'}
@@ -504,7 +505,7 @@ export default function NodesPage() {
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => openEditModal(node)}
-                                            className="w-6 h-6 hover:bg-[#18181b] text-[#a1a1aa]"
+                                            className="w-6 h-6 hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]"
                                             title="View / Edit Details"
                                         >
                                             <Edit3 className="w-3 h-3" />
@@ -513,7 +514,7 @@ export default function NodesPage() {
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => setDeletingNodeId(node.id)}
-                                            className="w-6 h-6 hover:bg-[#e11d48]/10 hover:text-[#e11d48] text-[#a1a1aa]"
+                                            className="w-6 h-6 hover:bg-[var(--status-error)]/10 hover:text-[var(--status-error)] text-[var(--text-secondary)]"
                                         >
                                             <Trash2 className="w-3 h-3" />
                                         </Button>
@@ -521,47 +522,47 @@ export default function NodesPage() {
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
-            </Panel>
+                    </div>
+                </GlassCard>
+            )}
 
             {/* Add Node Modal (Keep logic, update styling to match) */}
-            <Modal open={showAddModal} onClose={() => setShowAddModal(false)} title="NEW ENDPOINT">
+            <Modal open={showAddModal} onClose={() => setShowAddModal(false)} title="NEW_ENDPOINT">
                 <div className="space-y-4">
                     {/* Mode Tabs */}
-                    <div className="flex border border-[#27272a] bg-[#000000] p-0.5">
+                    <div className="flex border border-[var(--border-color)] bg-[var(--bg-base)] p-0.5">
                         <Button
                             variant="ghost"
                             onClick={() => setAddMode('url')}
                             className={cn(
                                 'flex-1 h-auto py-1.5 px-3 text-xs font-mono font-bold uppercase rounded-none transition-none',
-                                addMode === 'url' ? 'bg-[#e4e4e7] text-[#000000] hover:bg-[#e4e4e7] hover:text-[#000000]' : 'text-[#71717a] hover:bg-[#18181b] hover:text-[#a1a1aa]'
+                                addMode === 'url' ? 'bg-[var(--text-primary)] text-[var(--bg-base)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-base)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]'
                             )}
                         >
-                            URI IMPORT
+                            URI_IMPORT
                         </Button>
                         <Button
                             variant="ghost"
                             onClick={() => setAddMode('manual')}
                             className={cn(
-                                'flex-1 h-auto py-1.5 px-3 text-xs font-mono font-bold uppercase rounded-none transition-none border-l border-[#27272a]',
-                                addMode === 'manual' ? 'bg-[#e4e4e7] text-[#000000] hover:bg-[#e4e4e7] hover:text-[#000000]' : 'text-[#71717a] hover:bg-[#18181b] hover:text-[#a1a1aa]'
+                                'flex-1 h-auto py-1.5 px-3 text-xs font-mono font-bold uppercase rounded-none transition-none border-l border-[var(--border-color)]',
+                                addMode === 'manual' ? 'bg-[var(--text-primary)] text-[var(--bg-base)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-base)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]'
                             )}
                         >
-                            RAW CONFIG
+                            RAW_CONFIG
                         </Button>
                     </div>
 
                     {addMode === 'url' ? (
                         <div>
                             <Input
-                                label="SUBSCRIPTION URI"
+                                label="SUBSCRIPTION_URI"
                                 placeholder="vmess:// / vless:// / https://..."
                                 value={addUrl}
                                 onChange={e => setAddUrl(e.target.value)}
                             />
-                            <p className="text-[10px] font-mono text-[#52525b] mt-2 uppercase tracking-widest">
-                                BASE64 DECODING SUPPORTED NATIVELY
+                            <p className="text-[10px] font-mono text-[var(--text-secondary)] mt-2 uppercase tracking-widest opacity-60">
+                                BASE64_DECODING_SUPPORTED_NATIVELY
                             </p>
                         </div>
                     ) : (
@@ -574,14 +575,14 @@ export default function NodesPage() {
                             />
                             <div className="grid grid-cols-4 gap-3">
                                 <div className="col-span-1">
-                                    <label className="text-xs font-mono font-medium text-[#71717a] uppercase tracking-wider block mb-1.5">PROTO</label>
+                                    <label className="text-xs font-mono font-medium text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">PROTO</label>
                                     <select
                                         value={addType}
                                         onChange={e => setAddType(e.target.value as any)}
-                                        className="w-full h-9 rounded-none bg-[#09090b] border border-[#27272a] px-2 text-xs font-mono text-[#e4e4e7] focus:outline-none focus:border-[#3b82f6 uppercase]"
+                                        className="w-full h-9 rounded-none bg-[var(--bg-base)] border border-[var(--border-color)] px-2 text-xs font-mono text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] uppercase"
                                     >
                                         {getAllProtocols().filter(p => !['mixed', 'tun', 'http'].includes(p.id)).map(p => (
-                                            <option key={p.id} value={p.id} className="uppercase bg-[#000000]">{p.id}</option>
+                                            <option key={p.id} value={p.id} className="uppercase bg-[var(--bg-base)]">{p.id}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -606,7 +607,7 @@ export default function NodesPage() {
                         </div>
                     )}
 
-                    <div className="flex justify-end gap-2 pt-4 border-t border-[#27272a] mt-6">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-6">
                         <Button variant="ghost" onClick={() => setShowAddModal(false)}>ABORT</Button>
                         <Button
                             variant="primary"
@@ -616,32 +617,32 @@ export default function NodesPage() {
                                 (addMode === 'manual' && (!addName.trim() || !addServer.trim()))
                             }
                         >
-                            {addSubmitting && <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" />}
+                            {addSubmitting && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
                             EXECUTE_ADD
                         </Button>
                     </div>
                 </div>
             </Modal>
             {/* Edit / Detail Modal */}
-            <Modal open={!!editNodeId} onClose={() => setEditNodeId(null)} title="NODE DETAILS / EDIT">
+            <Modal open={!!editNodeId} onClose={() => setEditNodeId(null)} title="NODE_DETAILS">
                 <div className="space-y-4">
                     <div className="flex justify-between items-center mb-2">
-                        <p className="text-xs font-mono text-[#71717a] uppercase tracking-wider">RAW CONFIGURATION (JSON)</p>
-                        {isEditReadOnly && <span className="text-[10px] font-mono text-[#f59e0b] px-2 py-0.5 border border-[#f59e0b]/30 bg-[#f59e0b]/10 uppercase tracking-widest">READ-ONLY (PROVIDER MANAGED)</span>}
+                        <p className="text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider">RAW_CONFIGURATION (JSON)</p>
+                        {isEditReadOnly && <span className="text-[10px] font-mono text-[var(--status-warning)] px-2 py-0.5 border border-[var(--status-warning)]/30 bg-[var(--status-warning)]/10 uppercase tracking-widest">READ_ONLY (PROVIDER_MANAGED)</span>}
                     </div>
                     <textarea
                         value={editConfigRaw}
                         onChange={e => setEditConfigRaw(e.target.value)}
                         readOnly={isEditReadOnly}
                         className={cn(
-                            "w-full h-64 bg-[#000000] border border-[#27272a] p-3 text-xs font-mono text-[#e4e4e7] focus:outline-none focus:border-[#3b82f6] resize-none",
-                            isEditReadOnly && "opacity-80 focus:border-[#27272a] cursor-not-allowed"
+                            "w-full h-64 bg-[var(--bg-base)] border border-[var(--border-color)] p-3 text-xs font-mono text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] resize-none",
+                            isEditReadOnly && "opacity-80 focus:border-[var(--border-color)] cursor-not-allowed"
                         )}
                         spellCheck={false}
                     />
-                    <div className="flex justify-end gap-2 pt-4 border-t border-[#27272a] mt-6">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-6">
                         <Button variant="ghost" onClick={() => setEditNodeId(null)}>
-                            {isEditReadOnly ? 'CLOSE' : 'CANCEL'}
+                            {isEditReadOnly ? 'CLOSE' : 'ABORT'}
                         </Button>
                         {!isEditReadOnly && (
                             <Button
@@ -649,8 +650,8 @@ export default function NodesPage() {
                                 onClick={handleEditSave}
                                 disabled={editNodeMutation.isPending}
                             >
-                                {editNodeMutation.isPending && <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" />}
-                                SAVE CONFIG
+                                {editNodeMutation.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
+                                SAVE_CONFIG
                             </Button>
                         )}
                     </div>

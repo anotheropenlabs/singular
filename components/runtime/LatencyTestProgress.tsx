@@ -3,6 +3,7 @@
 import { memo, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Loader2, Zap, Check, X, Clock } from 'lucide-react';
+import Button from '../ui/Button';
 
 // ========================================
 // Types
@@ -264,12 +265,14 @@ const LatencyTestProgress = memo(({
                     <X className="w-4 h-4" />
                     <span>测试失败</span>
                 </div>
-                <button
+                <Button
+                    variant="outline"
+                    size="sm"
                     onClick={onRetry}
-                    className="px-3 py-1 text-xs font-medium rounded-md bg-sing-blue/20 text-sing-blue border border-sing-blue/30 hover:bg-sing-blue/30 transition-colors"
+                    className="px-3 text-[10px] bg-sing-blue/10 text-sing-blue border-sing-blue/30 hover:bg-sing-blue/20 transition-colors"
                 >
                     重试
-                </button>
+                </Button>
             </div>
         );
     }

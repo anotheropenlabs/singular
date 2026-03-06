@@ -74,11 +74,20 @@ export async function refreshProvider(providerId: number): Promise<{
         }
 
         // 1. Fetch subscription content
-        const response = await fetch(providerData.url, {
-            headers: {
-                'User-Agent': providerData.user_agent || 'sing-box',
-            },
-        });
+        let response;
+        try {
+            response = await fetch(providerData.url, {
+                headers: {
+                    'User-Agent': providerData.user_agent || 'sing-box',
+                },
+                signal: AbortSignal.timeout(15000)
+            });
+        } catch (e: any) {
+            return {
+                success: false,
+                error: `Network Error: ${e.message}`
+            };
+        }
 
         if (!response.ok) {
             return {

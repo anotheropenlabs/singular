@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '@fontsource/geist-sans';
 import '@fontsource/geist-mono';
 import './globals.css';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'Singular - sing-box Management Panel',
@@ -40,6 +41,23 @@ export default async function RootLayout({
       <body className="font-sans bg-black text-white antialiased selection:bg-sing-blue/30">
         <ThemeProvider>
           <Providers>{children}</Providers>
+          <Toaster
+            theme="dark"
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: 'rgba(17, 24, 39, 0.9)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontFamily: 'var(--font-mono, monospace)',
+                fontSize: '12px',
+                borderRadius: '1rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

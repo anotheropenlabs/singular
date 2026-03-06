@@ -31,6 +31,7 @@ import { useI18n } from '@/lib/i18n';
 import type { SystemMode } from '@/types';
 import SingularLogo from '@/components/ui/SingularLogo';
 import { useSystemMode } from '@/hooks/useSystemSettings';
+import Button from '@/components/ui/Button';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -124,12 +125,13 @@ export default function Sidebar({ isCollapsed, toggleCollapse, username }: Sideb
         )}
       >
         {/* Floating Toggle Button */}
-        <button 
+        <Button 
+            variant="ghost"
             onClick={toggleCollapse}
-            className="absolute -right-3 top-8 w-6 h-6 bg-[var(--bg-base)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-primary)] transition-all z-40 opacity-0 group-hover:opacity-100 hover:opacity-100 rounded-none shadow-md"
+            className="absolute -right-3 top-8 w-6 h-6 p-0 bg-[var(--bg-base)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-primary)] transition-all z-40 opacity-0 group-hover:opacity-100 hover:opacity-100 shadow-md"
         >
             {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
+        </Button>
 
         {/* Logo Area */}
         <div className="h-20 flex flex-col justify-center px-4 shrink-0 bg-black/20 border-b border-[var(--border-color)]">

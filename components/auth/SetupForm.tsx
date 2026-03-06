@@ -54,12 +54,14 @@ export default function SetupForm() {
       {setupComplete ? (
         <div className="space-y-6">
           <div className="bg-black/40 rounded-xl p-5 space-y-3 font-mono text-sm border border-white/5 relative group">
-            <button 
+            <Button 
+                variant="ghost"
+                size="icon"
                 onClick={copyToClipboard}
-                className="absolute top-2 right-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all"
+                className="absolute top-2 right-2 w-8 h-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-none"
             >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-            </button>
+                {copied ? <Check className="w-4 h-4 text-[var(--status-success)]" /> : <Copy className="w-4 h-4" />}
+            </Button>
             <div className="flex justify-between items-center">
               <span className="text-sing-text-tertiary">{t('auth.username')}:</span>
               <span className="text-white select-all">{credentials?.username}</span>

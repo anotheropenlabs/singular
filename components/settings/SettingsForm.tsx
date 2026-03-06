@@ -74,14 +74,15 @@ export default function SettingsForm() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
               {THEMES.map((t) => (
-                  <button
+                  <Button
+                      variant={theme === t.id ? 'primary' : 'outline'}
                       key={t.id}
                       disabled={t.disabled}
                       onClick={() => setTheme(t.id as any)}
                       className={cn(
-                          "flex flex-col text-left p-4 border transition-all duration-200 group relative overflow-hidden focus:outline-none",
+                          "flex flex-col text-left p-4 h-auto transition-all duration-200 group relative overflow-hidden",
                           theme === t.id 
-                              ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)]" 
+                              ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)] shadow-glow-sm" 
                               : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--text-secondary)]",
                           t.disabled && "opacity-50 cursor-not-allowed grayscale"
                       )}
@@ -93,7 +94,7 @@ export default function SettingsForm() {
                           ))}
                       </div>
 
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-2 w-full">
                         <span className="font-mono font-bold text-sm text-[var(--text-primary)] uppercase tracking-tight">{t.name}</span>
                         {t.badge && (
                             <span className={cn(
@@ -116,7 +117,7 @@ export default function SettingsForm() {
                               <div className="absolute top-[-16px] right-[-16px] w-8 h-8 bg-[var(--accent-primary)] rotate-45" />
                           </div>
                       )}
-                  </button>
+                  </Button>
               ))}
           </div>
       </Panel>
@@ -131,32 +132,34 @@ export default function SettingsForm() {
           />
 
           <div className="grid grid-cols-2 max-w-lg gap-4 mt-6">
-              <button 
+              <Button 
+                variant={language === 'en' ? 'primary' : 'outline'}
                 onClick={() => setLanguage('en')}
                 className={cn(
-                    "p-4 border transition-all duration-200 text-left relative",
+                    "p-4 h-auto transition-all duration-200 flex flex-col items-start relative",
                     language === 'en' 
-                    ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)] shadow-[0_0_15px_rgba(59,130,246,0.1)]" 
+                    ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)] shadow-glow-sm" 
                     : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--text-secondary)]"
                 )}
               >
                   <div className="font-mono font-bold text-[var(--text-primary)] text-sm mb-1 uppercase">English</div>
                   <div className="text-[10px] text-[var(--text-secondary)] font-mono">United States</div>
                   {language === 'en' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent-primary)]" />}
-              </button>
-              <button 
+              </Button>
+              <Button 
+                variant={language === 'zh' ? 'primary' : 'outline'}
                 onClick={() => setLanguage('zh')}
                 className={cn(
-                    "p-4 border transition-all duration-200 text-left relative",
+                    "p-4 h-auto transition-all duration-200 flex flex-col items-start relative",
                     language === 'zh' 
-                    ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)] shadow-[0_0_15px_rgba(59,130,246,0.1)]" 
+                    ? "border-[var(--accent-primary)] bg-[var(--bg-surface-hover)] shadow-glow-sm" 
                     : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--text-secondary)]"
                 )}
               >
                   <div className="font-sans font-bold text-[var(--text-primary)] text-sm mb-1">中文</div>
                   <div className="text-[10px] text-[var(--text-secondary)] font-mono">简体中文</div>
                   {language === 'zh' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent-primary)]" />}
-              </button>
+              </Button>
           </div>
       </Panel>
 

@@ -380,19 +380,20 @@ function RawConfigTab() {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
-            <button
+            <Button
+              variant={isActive ? 'primary' : 'ghost'}
               key={tab.id}
               onClick={() => setActiveTab(tab.id as RawConfigTabId)}
               className={cn(
-                'flex items-center gap-2 px-6 py-3 border-b-2 transition-all duration-200 uppercase tracking-wider text-[11px] font-mono',
+                'flex items-center gap-2 px-6 py-3 border-b-2 transition-all duration-200 uppercase tracking-widest text-[11px] h-auto rounded-none',
                 isActive
-                  ? 'border-[var(--accent-primary)] text-[var(--accent-primary)]'
+                  ? 'border-[var(--accent-primary)] text-[var(--accent-primary)] bg-[var(--accent-primary)]/5'
                   : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)]'
               )}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-            </button>
+            </Button>
           );
         })}
       </div>

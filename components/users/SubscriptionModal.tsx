@@ -62,9 +62,14 @@ export default function SubscriptionModal({ user, onClose }: SubscriptionModalPr
                <p className="text-xs text-sing-text-secondary">For {user.username}</p>
              </div>
           </div>
-          <button onClick={onClose} className="text-sing-text-secondary hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="w-8 h-8 text-[var(--text-secondary)] hover:text-[var(--status-error)] border-none"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
         <div className="space-y-4">
@@ -75,10 +80,13 @@ export default function SubscriptionModal({ user, onClose }: SubscriptionModalPr
                 {subUrl}
               </div>
               <Button 
-                variant="secondary" 
+                variant="outline" 
                 size="icon" 
                 onClick={() => copyToClipboard(subUrl, setCopiedSub)}
-                className={copiedSub ? "text-sing-green bg-sing-green/20" : ""}
+                className={cn(
+                    "h-9 w-9 flex-shrink-0 transition-all",
+                    copiedSub ? "text-[var(--status-success)] border-[var(--status-success)] bg-[var(--status-success)]/10" : ""
+                )}
               >
                 {copiedSub ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
@@ -97,12 +105,15 @@ export default function SubscriptionModal({ user, onClose }: SubscriptionModalPr
               />
               <div className="absolute top-2 right-2">
                  <Button 
-                   variant="secondary" 
+                   variant="outline" 
                    size="sm" 
                    onClick={() => copyToClipboard(nodeLinks, setCopiedLinks)}
-                   className={copiedLinks ? "text-sing-green bg-sing-green/20" : ""}
+                   className={cn(
+                       "h-7 px-2",
+                       copiedLinks ? "text-[var(--status-success)] border-[var(--status-success)] bg-[var(--status-success)]/10" : ""
+                   )}
                  >
-                   {copiedLinks ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                   {copiedLinks ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
                    {copiedLinks ? 'Copied' : 'Copy All'}
                  </Button>
               </div>

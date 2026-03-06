@@ -56,7 +56,15 @@ export const POST = withAuth(async (request: NextRequest) => {
 
     if (url || subscription) {
         // Parse from subscription
-        const content = url ? `Base64URL=${encodeURIComponent(url)}` : subscription;
+        // If input is a protocol URI (vless://, vmess://, etc.), pass directly to parser.
+        // If it's an HTTP(S) subscription URL, wrap as Base64URL for remote fetching.
+        let content: string;
+        if (url) {
+            const isProtocolUri = /^(vless|vmess|trojan|ss|ssr|hysteria2?|tuic):\/\//i.test(url.trim());
+            content = isProtocolUri ? url.trim() : `Base64URL=${encodeURIComponent(url)}`;
+        } else {
+            content = subscription;
+        }
         nodesToAdd = parseSubscription(content);
 
         if (nodesToAdd.length === 0) {
@@ -76,10 +84,10 @@ export const POST = withAuth(async (request: NextRequest) => {
 
     // Insert nodes transactionally
     const mode = await getSystemMode();
-    const results = await db.transaction(async (tx) => {
+    const results = db.transaction((tx) => {
         const _results = [];
         for (const node of nodesToAdd) {
-            const result = await tx.insert(proxyNode).values({
+            const result = tx.insert(proxyNode).values({
                 side: mode,
                 provider_id: provider_id || null,
                 name: node.name,

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useI18n } from '@/lib/i18n';
 import { Provider } from '@/types';
 import { useProviders, useProviderMutations } from '@/hooks/useProviders';
-import Panel from '@/components/ui/Panel';
+import Panel from '@/components/ui/GlassCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
@@ -23,7 +23,6 @@ import {
     ToggleLeft,
     ToggleRight,
     Rss,
-    ExternalLink,
     Loader2,
 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
@@ -145,7 +144,7 @@ export default function ProvidersPage() {
     };
 
     const formatLastUpdate = (timestamp: number | null) => {
-        if (!timestamp) return t('providers.never_updated');
+        if (!timestamp) return 'NEVER';
         const date = new Date(timestamp * 1000);
         const now = new Date();
         const diffMs = now.getTime() - date.getTime();
@@ -153,115 +152,106 @@ export default function ProvidersPage() {
         const diffHour = Math.floor(diffMs / 3600000);
         const diffDay = Math.floor(diffMs / 86400000);
 
-        if (diffMin < 1) return t('providers.time.just_now', 'Just now');
-        if (diffMin < 60) return t('providers.time.mins_ago', '{min}m ago').replace('{min}', diffMin.toString());
-        if (diffHour < 24) return t('providers.time.hours_ago', '{hour}h ago').replace('{hour}', diffHour.toString());
-        return t('providers.time.days_ago', '{day}d ago').replace('{day}', diffDay.toString());
-    };
-
-    const getTypeColor = (type: string): string => {
-        const colors: Record<string, string> = {
-            vless: 'text-blue-400',
-            vmess: 'text-purple-400',
-            trojan: 'text-green-400',
-            shadowsocks: 'text-cyan-400',
-            hysteria2: 'text-orange-400',
-            tuic: 'text-yellow-400',
-        };
-        return colors[type] || 'text-neutral-400';
+        if (diffMin < 1) return 'JUST_NOW';
+        if (diffMin < 60) return `${diffMin}M_AGO`;
+        if (diffHour < 24) return `${diffHour}H_AGO`;
+        return `${diffDay}D_AGO`;
     };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 text-sing-blue animate-spin" />
+                <div className="w-2 h-4 bg-[var(--text-primary)] animate-pulse" />
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-4 max-w-7xl mx-auto">
             <PageHeader
-                title={t('common.providers')}
+                title="PROVIDERS"
                 subtitle={t('providers.subtitle', 'Manage proxy providers')}
                 actions={
-                    <Button onClick={() => { resetForm(); setShowAddModal(true); }}>
+                    <Button variant="outline" size="sm" onClick={() => { resetForm(); setShowAddModal(true); }}>
                         <Plus className="w-4 h-4 mr-2" />
-                        {t('providers.add')}
+                        NEW_PROVIDER
                     </Button>
                 }
             />
 
             {/* Provider Cards */}
             {providers.length === 0 ? (
-                <EmptyState
-                    icon={Rss}
-                    title={t('providers.no_providers')}
-                    description={t('providers.no_providers_desc')}
-                />
+                <div className="h-48 flex flex-col items-center justify-center text-[var(--text-secondary)] font-mono border border-dashed border-[var(--border-color)] bg-[var(--bg-base)]">
+                    <Rss className="w-8 h-8 mb-4 opacity-20" />
+                    <p className="text-xs tracking-widest uppercase">[NO_PROVIDERS_FOUND]</p>
+                </div>
             ) : (
                 <div className="grid gap-4">
                     {providers.map((p) => (
-                        <Panel key={p.id} className="p-5 border border-[var(--border-color)] bg-[var(--bg-base)]">
-                            <div className="flex items-start justify-between gap-4">
+                        <Panel
+                            key={p.id}
+                            variant="elevated"
+                            hoverable
+                            className="group transition-all duration-200"
+                        >
+                            <div className="flex items-start justify-between gap-4 p-5">
                                 {/* Left: Info */}
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className={`w-2 h-2 ${p.enabled ? 'bg-green-400' : 'bg-neutral-600'}`} />
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${p.enabled ? 'bg-[var(--status-success)] shadow-[0_0_8px_var(--status-success)]' : 'bg-[var(--text-secondary)]'}`} />
                                         <h3 className="text-lg font-mono font-bold text-[var(--text-primary)] uppercase tracking-wider truncate">
                                             {p.name}
                                         </h3>
-                                        <span className="text-[10px] font-mono tracking-widest px-2 py-0.5 bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-color)] shrink-0">
-                                            {p.node_count} {t('providers.node_count')}
+                                        <span className="text-[10px] font-mono tracking-widest px-2 py-0.5 bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] border border-[var(--border-color)] shrink-0">
+                                            {p.node_count} NODES
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-wide text-[var(--text-secondary)] mb-3">
-                                        <Globe className="w-3 h-3 shrink-0" />
-                                        <span className="truncate">{p.url}</span>
+                                    <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-wide text-[var(--text-secondary)] mb-4">
+                                        <Globe className="w-3 h-3 shrink-0 opacity-50" />
+                                        <span className="truncate opacity-80">{p.url}</span>
                                     </div>
 
-                                    <div className="flex items-center gap-4 text-[10px] font-mono tracking-wide text-[var(--text-secondary)]">
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="w-3 h-3" />
-                                            <span>{t('providers.last_update')}: {formatLastUpdate(p.last_update_at)}</span>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:flex lg:items-center gap-x-6 gap-y-2 text-[10px] font-mono tracking-wide text-[var(--text-secondary)]">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock className="w-3 h-3 opacity-50" />
+                                            <span className="uppercase">UPDATE: {formatLastUpdate(p.last_update_at)}</span>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <RefreshCw className="w-3 h-3" />
-                                            <span>{t('providers.update_interval')}: {Math.round(p.update_interval / 3600)}h</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <RefreshCw className="w-3 h-3 opacity-50" />
+                                            <span className="uppercase">INTERVAL: {Math.round(p.update_interval / 3600)}H</span>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <Server className="w-3 h-3" />
-                                            <span>UA: {p.user_agent || 'sing-box'}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <Server className="w-3 h-3 opacity-50" />
+                                            <span className="uppercase truncate max-w-[100px]">AGENT: {p.user_agent || 'sing-box'}</span>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <span className="px-1.5 py-0.5 bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-secondary)] font-mono uppercase text-[10px] tracking-widest">
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-1.5 py-0.5 bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-secondary)] font-mono uppercase text-[9px] tracking-widest">
                                                 {(p as any).subscription_type || 'auto'}
                                             </span>
+                                            {refreshResults.get(p.id) && (
+                                                <div className="flex items-center gap-1.5 ml-2">
+                                                    <span className="text-[var(--status-success)]">+{refreshResults.get(p.id)!.added}</span>
+                                                    <span className="text-[var(--status-warning)]">~{refreshResults.get(p.id)!.updated}</span>
+                                                    <span className="text-[var(--status-error)]">-{refreshResults.get(p.id)!.deleted}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                        {refreshResults.get(p.id) && (
-                                            <div className="flex items-center gap-1 text-sing-blue">
-                                                <span className="text-green-400">+{refreshResults.get(p.id)!.added}</span>
-                                                <span className="text-yellow-400">~{refreshResults.get(p.id)!.updated}</span>
-                                                <span className="text-red-400">-{refreshResults.get(p.id)!.deleted}</span>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
 
                                 {/* Right: Actions */}
-                                <div className="flex items-center gap-1 shrink-0">
+                                <div className="flex items-center gap-1 shrink-0 opacity-20 group-hover:opacity-100 transition-opacity">
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => handleToggleEnabled(p)}
-                                        className="hover:border-[var(--border-color)]"
-                                        title={p.enabled ? t('providers.enabled') : t('providers.disabled')}
+                                        className="w-10 h-8 border font-mono text-[9px] uppercase transition-all"
                                     >
                                         {p.enabled ? (
-                                            <ToggleRight className="w-5 h-5 text-[#10b981]" />
+                                            <span className="text-[var(--status-success)] font-bold">ON</span>
                                         ) : (
-                                            <ToggleLeft className="w-5 h-5 text-[var(--text-secondary)]" />
+                                            <span className="text-[var(--text-secondary)]">OFF</span>
                                         )}
                                     </Button>
                                     <Button
@@ -269,8 +259,8 @@ export default function ProvidersPage() {
                                         size="icon"
                                         onClick={() => handleRefresh(p.id)}
                                         disabled={refreshingId === p.id}
-                                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)]"
-                                        title={t('providers.refresh')}
+                                        className="w-8 h-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                                        title="REFRESH_DATA"
                                     >
                                         <RefreshCw className={`w-4 h-4 ${refreshingId === p.id ? 'animate-spin' : ''}`} />
                                     </Button>
@@ -278,8 +268,8 @@ export default function ProvidersPage() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => openEditModal(p)}
-                                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)]"
-                                        title={t('common.edit')}
+                                        className="w-8 h-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                                        title="EDIT_PROVIDER"
                                     >
                                         <Edit3 className="w-4 h-4" />
                                     </Button>
@@ -287,8 +277,8 @@ export default function ProvidersPage() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => setDeletingId(p.id)}
-                                        className="hover:border-sing-red/30 hover:bg-sing-red/10 text-[var(--text-secondary)] hover:text-sing-red"
-                                        title={t('common.delete')}
+                                        className="w-8 h-8 hover:text-[var(--status-error)] hover:bg-[var(--status-error)]/10 text-[var(--text-secondary)]"
+                                        title="DELETE_PROVIDER"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -303,60 +293,61 @@ export default function ProvidersPage() {
             <Modal
                 open={showAddModal}
                 onClose={closeModal}
-                title={editingProvider ? t('providers.edit') : t('providers.add')}
+                title={editingProvider ? 'MOD_PROVIDER_CFG' : 'NEW_PROVIDER_DEF'}
             >
                 <div className="space-y-4">
                     <Input
-                        label={t('providers.name')}
-                        placeholder="My Subscription"
+                        label="PROVIDER_IDENTIFIER"
+                        placeholder="e.g. My Subscription"
                         value={formName}
                         onChange={(e) => setFormName(e.target.value)}
                     />
                     <Input
-                        label={t('providers.url')}
+                        label="SUBSCRIPTION_ENDPOINT"
                         placeholder="https://example.com/subscribe?token=..."
                         value={formUrl}
                         onChange={(e) => setFormUrl(e.target.value)}
                     />
                     <Input
-                        label={t('providers.user_agent')}
+                        label="USER_AGENT_STRING"
                         placeholder="sing-box"
                         value={formUserAgent}
                         onChange={(e) => setFormUserAgent(e.target.value)}
                     />
-                    <div>
-                        <label className="block text-xs font-mono font-bold text-[var(--text-secondary)] uppercase mb-2">
-                            {t('providers.subscription_format', 'Subscription Format')}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-mono font-medium text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
+                            SUB_FORMAT_SPEC
                         </label>
                         <select
                             value={formSubscriptionType}
                             onChange={(e) => setFormSubscriptionType(e.target.value as SubscriptionType)}
-                            className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] px-3 py-2 text-sm text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-primary)] appearance-none"
+                            className="w-full h-9 rounded-none bg-[var(--bg-base)] border border-[var(--border-color)] px-2 text-xs font-mono text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] uppercase appearance-none"
                         >
                             {SUBSCRIPTION_TYPES.map(_t => (
                                 <option key={_t.value} value={_t.value} className="bg-[var(--bg-base)]">
-                                    {_t.label} — {t(`providers.type.${_t.value}` as any, _t.defaultDesc)}
+                                    {_t.label} — {t(`providers.type.${_t.value}` as any, _t.defaultDesc).toUpperCase()}
                                 </option>
                             ))}
                         </select>
                     </div>
                     <Input
-                        label={`${t('providers.update_interval')} (${t('providers.interval_hours').replace('{hours}', '')})`}
+                        label={`REFRESH_INTERVAL (HOURS)`}
                         type="number"
                         placeholder="24"
                         value={formInterval.toString()}
                         onChange={(e) => setFormInterval(parseInt(e.target.value) || 24)}
                     />
-                    <div className="flex justify-end gap-2 pt-2">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-6">
                         <Button variant="ghost" onClick={closeModal}>
-                            {t('common.cancel')}
+                            ABORT
                         </Button>
                         <Button
+                            variant="primary"
                             onClick={handleSubmit}
                             disabled={createProvider.isPending || updateProvider.isPending || !formName.trim() || !formUrl.trim()}
                         >
-                            {(createProvider.isPending || updateProvider.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {editingProvider ? t('common.update') : t('common.add')}
+                            {(createProvider.isPending || updateProvider.isPending) && <RefreshCw className="w-4 h-4 mr-2 animate-spin" />}
+                            {editingProvider ? 'COMMIT_UPDATE' : 'EXECUTE_ADD'}
                         </Button>
                     </div>
                 </div>
@@ -367,8 +358,8 @@ export default function ProvidersPage() {
                 open={!!deletingId}
                 onClose={() => setDeletingId(null)}
                 onConfirm={handleDelete}
-                title={t('providers.delete_confirm')}
-                description={t('providers.delete_desc')}
+                title="TERMINATE_PROVIDER"
+                description="Are you sure you want to permanently delete this subscription provider?"
                 isLoading={deleteProvider.isPending}
             />
         </div>

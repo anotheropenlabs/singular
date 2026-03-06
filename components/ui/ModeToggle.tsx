@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Globe, Shield, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
+import Button from './Button';
 
 type Mode = 'rule' | 'global' | 'direct';
 
@@ -47,13 +48,17 @@ export default function ModeToggle() {
 
   return (
     <div className="relative">
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-sm font-medium text-white"
+        variant="primary"
+        className={cn(
+          "h-9 gap-2 px-3 border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--accent-primary)]",
+          isOpen && "border-[var(--accent-primary)] shadow-glow-sm"
+        )}
       >
-        <Icon className="w-4 h-4 text-sing-blue" />
+        <Icon className="w-4 h-4 text-[var(--accent-primary)]" />
         <span className="capitalize" suppressHydrationWarning>{currentMode.label}</span>
-      </button>
+      </Button>
 
       {isOpen && (
         <>
@@ -67,19 +72,20 @@ export default function ModeToggle() {
               const isActive = mode.value.toLowerCase() === config?.mode?.toLowerCase();
               
               return (
-                <button
+                <Button
+                  variant="ghost"
                   key={mode.value}
                   onClick={() => mutation.mutate(mode.value)}
                   className={cn(
-                    "flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors",
+                    "flex items-center justify-start gap-2 w-full px-3 py-2 h-auto text-[11px] font-mono uppercase tracking-wider transition-colors border-none",
                     isActive 
-                      ? "bg-sing-blue/20 text-sing-blue" 
-                      : "text-sing-text-secondary hover:text-white hover:bg-white/5"
+                      ? "text-[var(--accent-primary)] bg-[var(--accent-primary)]/10" 
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]"
                   )}
                 >
-                  <ModeIcon className="w-4 h-4" />
+                  <ModeIcon className="w-3.5 h-3.5" />
                   <span suppressHydrationWarning>{mode.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

@@ -23,11 +23,17 @@ export const POST = withAuth(async (request: NextRequest) => {
     }
 
     // 1. Fetch subscription content
-    const response = await fetch(url, {
-        headers: {
-            'User-Agent': user_agent || 'sing-box',
-        },
-    });
+    let response;
+    try {
+        response = await fetch(url, {
+            headers: {
+                'User-Agent': user_agent || 'sing-box',
+            },
+            signal: AbortSignal.timeout(15000)
+        });
+    } catch (e: any) {
+        return errorResponse(`Network Error: ${e.message}`, 400);
+    }
 
     if (!response.ok) {
         return errorResponse(`Failed to fetch subscription: ${response.status} ${response.statusText}`, 400);
